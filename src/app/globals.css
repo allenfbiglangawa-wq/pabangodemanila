@@ -1,0 +1,139 @@
+@import "tailwindcss";
+
+@theme {
+  --color-pearl: #ffffff;
+  --color-ivory: #f6f4ef;
+  --color-charcoal: #292724;
+  --color-champagne: #c4ab82;
+  --color-champagne-deep: #8d7a5b; /* AA-contrast variant for small gold text on white */
+  --color-sand: #d7c4ab;
+  --color-sage: #8a927d;
+  --color-muted: #6b665e;
+  --color-line: #e7e2d8;
+
+  --font-serif: var(--font-cormorant), "Cormorant Garamond", Georgia, serif;
+  --font-sans: var(--font-inter), Inter, ui-sans-serif, system-ui, sans-serif;
+
+  --ease-luxe: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-pearl text-charcoal font-sans;
+  }
+  ::selection {
+    background: var(--color-sand);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-champagne-deep);
+    outline-offset: 3px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 px-7 py-3.5 text-[12px] font-medium uppercase tracking-[0.2em] transition-all duration-500 ease-(--ease-luxe) disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+@layer components {
+  .container-luxe {
+    @apply mx-auto w-full max-w-[1320px] px-5 sm:px-8 lg:px-12;
+  }
+  .eyebrow {
+    @apply text-[11px] font-medium uppercase tracking-[0.28em] text-champagne-deep;
+  }
+  .display {
+    @apply font-serif font-light leading-[1.05] tracking-[-0.01em];
+  }
+  .btn-primary {
+    @apply btn bg-charcoal text-pearl hover:bg-black;
+  }
+  .btn-outline {
+    @apply btn border border-charcoal text-charcoal hover:bg-charcoal hover:text-pearl;
+  }
+  .btn-light {
+    @apply btn border border-pearl/80 text-pearl hover:bg-pearl hover:text-charcoal;
+  }
+  .btn-link {
+    @apply inline-flex items-center gap-2 border-b border-charcoal/40 pb-1 text-[12px] font-medium uppercase tracking-[0.2em] transition-colors hover:border-champagne hover:text-champagne-deep;
+  }
+  .field {
+    @apply block w-full border border-line bg-pearl px-4 py-3 text-[15px] text-charcoal placeholder:text-muted/70 transition-colors focus:border-charcoal focus:outline-none;
+  }
+  .label {
+    @apply mb-2 block text-[11px] font-medium uppercase tracking-[0.18em] text-muted;
+  }
+  .prose-luxe {
+    @apply space-y-5 text-[16px] leading-[1.85] text-charcoal/85;
+  }
+  .card-hover img {
+    @apply transition-transform duration-[1200ms] ease-(--ease-luxe);
+  }
+  .card-hover:hover img {
+    @apply scale-[1.04];
+  }
+  /* Admin */
+  .admin-card {
+    @apply rounded-sm border border-line bg-pearl p-5;
+  }
+  .admin-table {
+    @apply w-full text-left text-[13px];
+  }
+  .admin-table th {
+    @apply border-b border-line px-3 py-2.5 text-[11px] font-medium uppercase tracking-[0.12em] text-muted;
+  }
+  .admin-table td {
+    @apply border-b border-line/70 px-3 py-3 align-top;
+  }
+  .admin-btn {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-sm bg-charcoal px-4 py-2 text-[12px] font-medium text-pearl transition-colors hover:bg-black disabled:opacity-50;
+  }
+  .admin-btn-ghost {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-sm border border-line px-4 py-2 text-[12px] font-medium text-charcoal transition-colors hover:border-charcoal;
+  }
+  .admin-input {
+    @apply block w-full rounded-sm border border-line bg-pearl px-3 py-2 text-[14px] focus:border-charcoal focus:outline-none;
+  }
+  .admin-label {
+    @apply mb-1 block text-[12px] font-medium text-muted;
+  }
+  .badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium;
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.animate-fade-up {
+  animation: fade-up 1.2s var(--ease-luxe) both;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}

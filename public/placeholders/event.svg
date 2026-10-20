@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FBFAF7"/><stop offset="1" stop-color="#EFEBE2"/></linearGradient>
+<radialGradient id="glow" cx="0.3" cy="0.2" r="0.9"><stop offset="0" stop-color="#FFFFFF" stop-opacity="0.9"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/></radialGradient>
+<linearGradient id="glass" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#E9DFCD"/><stop offset="0.45" stop-color="#F8F3EA"/><stop offset="1" stop-color="#D7C4AB"/></linearGradient>
+<linearGradient id="gold" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#B39668"/><stop offset="0.5" stop-color="#D9C4A0"/><stop offset="1" stop-color="#A88B5E"/></linearGradient>
+</defs>
+<rect width="1920" height="1080" fill="url(#bg)"/><rect width="1920" height="1080" fill="url(#glow)"/>
+<g stroke="#D7C4AB" fill="none" stroke-width="2"><path d="M300 900 L 300 500 C 300 300 700 300 700 500 L 700 900"/><path d="M800 900 L 800 450 C 800 220 1240 220 1240 450 L 1240 900"/><path d="M1340 900 L 1340 500 C 1340 300 1740 300 1740 500 L 1740 900"/></g><g fill="#E7D7BA" opacity="0.7"><circle cx="1020" cy="760" r="60"/><circle cx="960" cy="800" r="40"/><circle cx="1080" cy="805" r="44"/></g>
+<text x="960" y="1052" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="13" letter-spacing="4" fill="#A79D8E">PLACEHOLDER IMAGE</text>
+</svg>

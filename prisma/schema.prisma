@@ -1,0 +1,525 @@
+// Pabango de Manila — data model.
+//
+// Development uses SQLite so the project runs with zero setup. For production
+// switch `provider` to "postgresql" and point DATABASE_URL at a Postgres
+// instance (see README). Status-like fields are plain strings validated in
+// src/lib/constants.ts so the schema stays portable across both providers.
+// All money is stored as integer centavos (₱1.00 = 100).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Accounts ──────────────────────────────────────────────────────────────
+
+model User {
+  id                  String    @id @default(cuid())
+  email               String    @unique
+  passwordHash        String
+  name                String
+  phone               String?
+  role                String    @default("CUSTOMER") // CUSTOMER | STAFF | ADMIN
+  marketingConsent    Boolean   @default(false)
+  deletionRequestedAt DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  sessions       Session[]
+  resetTokens    PasswordResetToken[]
+  addresses      Address[]
+  orders         Order[]
+  wishlist       WishlistItem[]
+  reviews        Review[]
+  carts          Cart[]
+  inventoryMoves InventoryMovement[]
+}
+
+model Session {
+  id        String   @id // sha256 of the cookie token
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model PasswordResetToken {
+  id        String    @id // sha256 of the emailed token
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+}
+
+model Address {
+  id         String  @id @default(cuid())
+  userId     String
+  user       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label      String? // Home, Office…
+  fullName   String
+  phone      String
+  line1      String
+  line2      String?
+  barangay   String
+  city       String
+  province   String
+  region     String
+  postalCode String
+  isDefault  Boolean @default(false)
+}
+
+// ─── Catalog ───────────────────────────────────────────────────────────────
+
+model Category {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  name        String
+  description String?
+  imageUrl    String?
+  sortOrder   Int       @default(0)
+  isActive    Boolean   @default(true)
+  products    Product[]
+}
+
+model Product {
+  id              String   @id @default(cuid())
+  slug            String   @unique
+  name            String
+  description     String
+  fragranceFamily String?
+  topNotes        String? // comma separated
+  heartNotes      String?
+  baseNotes       String?
+  categoryId      String?
+  category        Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  status          String   @default("DRAFT") // DRAFT | ACTIVE | ARCHIVED
+  isFeatured      Boolean  @default(false)
+  isBestseller    Boolean  @default(false)
+  isNewArrival    Boolean  @default(false)
+  isPlaceholder   Boolean  @default(false) // seeded sample data, must be replaced before launch
+  videoUrl        String?
+  shippingInfo    String?
+  seoTitle        String?
+  seoDescription  String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  images   ProductImage[]
+  variants ProductVariant[]
+  reviews  Review[]
+  wishlist WishlistItem[]
+
+  @@index([status, categoryId])
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url       String
+  alt       String  @default("")
+  sortOrder Int     @default(0)
+}
+
+model ProductVariant {
+  id                String  @id @default(cuid())
+  productId         String
+  product           Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  sku               String  @unique
+  name              String // e.g. "50 ml"
+  price             Int // centavos
+  salePrice         Int? // centavos
+  cost              Int? // unit cost of goods, centavos
+  stockOnHand       Int     @default(0)
+  stockReserved     Int     @default(0)
+  lowStockThreshold Int     @default(5)
+  isActive          Boolean @default(true)
+  sortOrder         Int     @default(0)
+  barcode           String? // reserved for future barcode scanning
+
+  movements  InventoryMovement[]
+  cartItems  CartItem[]
+  orderItems OrderItem[]
+}
+
+model InventoryMovement {
+  id               String         @id @default(cuid())
+  variantId        String
+  variant          ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  type             String // ADJUSTMENT | RESTOCK | RESERVE | RELEASE | SALE | RETURN | IMPORT
+  quantityChange   Int
+  previousOnHand   Int
+  newOnHand        Int
+  previousReserved Int
+  newReserved      Int
+  reason           String
+  adminId          String?
+  admin            User?          @relation(fields: [adminId], references: [id], onDelete: SetNull)
+  orderId          String?
+  createdAt        DateTime       @default(now())
+
+  @@index([variantId, createdAt])
+}
+
+// ─── Cart & wishlist ───────────────────────────────────────────────────────
+
+model Cart {
+  id           String     @id @default(cuid())
+  userId       String?
+  user         User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  discountCode String?
+  email        String? // captured only with consent, for abandoned-cart recovery
+  recoveryConsent Boolean @default(false)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  items        CartItem[]
+}
+
+model CartItem {
+  id        String         @id @default(cuid())
+  cartId    String
+  cart      Cart           @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  variantId String
+  variant   ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  quantity  Int
+
+  @@unique([cartId, variantId])
+}
+
+model WishlistItem {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, productId])
+}
+
+// ─── Orders & payments ─────────────────────────────────────────────────────
+
+model Order {
+  id                   String    @id @default(cuid())
+  number               String    @unique // PDM-100001
+  userId               String?
+  user                 User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  email                String
+  phone                String
+  fullName             String
+  line1                String
+  line2                String?
+  barangay             String
+  city                 String
+  province             String
+  region               String
+  postalCode           String
+  notes                String?
+  status               String    @default("PENDING_PAYMENT")
+  paymentMethod        String // GCASH | MAYA | CARD | BANK_TRANSFER | COD
+  paymentProvider      String // stub | bank_transfer | cod | paymongo | xendit
+  subtotal             Int
+  discountTotal        Int       @default(0)
+  shippingFee          Int       @default(0)
+  shippingCost         Int? // what the courier charged us, entered by the owner
+  total                Int
+  refundedTotal        Int       @default(0)
+  discountCode         String?
+  stockCommitted       Boolean   @default(false) // reservation converted to a sale
+  reservationExpiresAt DateTime?
+  bankTransferRef      String?
+  trackingNumber       String?
+  courier              String?
+  paidAt               DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  items    OrderItem[]
+  payments Payment[]
+  refunds  Refund[]
+  history  OrderStatusHistory[]
+
+  @@index([status, createdAt])
+}
+
+model OrderItem {
+  id               String          @id @default(cuid())
+  orderId          String
+  order            Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  variantId        String?
+  variant          ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  productId        String?
+  productName      String
+  variantName      String
+  sku              String
+  unitPrice        Int
+  unitCost         Int?
+  quantity         Int
+  lineTotal        Int
+  refundedQuantity Int             @default(0)
+  reviews          Review[]
+}
+
+model Payment {
+  id             String    @id @default(cuid())
+  orderId        String
+  order          Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  provider       String
+  method         String
+  providerRef    String? // checkout session / intent id at the provider
+  amount         Int
+  fee            Int       @default(0) // processing fee, centavos
+  status         String    @default("PENDING") // PENDING | SUCCEEDED | FAILED | REFUNDED | CANCELLED
+  idempotencyKey String    @unique
+  confirmedAt    DateTime?
+  createdAt      DateTime  @default(now())
+}
+
+model WebhookEvent {
+  id          String    @id @default(cuid())
+  provider    String
+  eventId     String
+  type        String
+  payload     String
+  processedAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@unique([provider, eventId])
+}
+
+model Refund {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  amount    Int
+  reason    String
+  restocked Boolean  @default(false)
+  adminId   String?
+  createdAt DateTime @default(now())
+}
+
+model OrderStatusHistory {
+  id         String   @id @default(cuid())
+  orderId    String
+  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  fromStatus String?
+  toStatus   String
+  note       String?
+  actor      String // "system", "customer", or admin email
+  createdAt  DateTime @default(now())
+}
+
+model DiscountCode {
+  id          String    @id @default(cuid())
+  code        String    @unique
+  description String?
+  type        String // PERCENT | FIXED
+  value       Int // percent (1-100) or centavos
+  minSubtotal Int       @default(0)
+  startsAt    DateTime?
+  endsAt      DateTime?
+  usageLimit  Int?
+  usedCount   Int       @default(0)
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+}
+
+model ShippingRule {
+  id               String  @id @default(cuid())
+  name             String
+  region           String? // null = applies to every region without a specific rule
+  fee              Int
+  freeOverSubtotal Int?
+  isActive         Boolean @default(true)
+}
+
+// ─── Reviews ───────────────────────────────────────────────────────────────
+
+model Review {
+  id                 String         @id @default(cuid())
+  productId          String
+  product            Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
+  userId             String?
+  user               User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+  orderItemId        String?
+  orderItem          OrderItem?     @relation(fields: [orderItemId], references: [id], onDelete: SetNull)
+  rating             Int
+  title              String?
+  body               String
+  displayName        String
+  isVerifiedPurchase Boolean        @default(false)
+  status             String         @default("PENDING") // PENDING | APPROVED | REJECTED
+  moderationNote     String?
+  adminResponse      String?
+  showOnHomepage     Boolean        @default(false)
+  createdAt          DateTime       @default(now())
+  media              ReviewMedia[]
+  reports            ReviewReport[]
+
+  @@index([productId, status])
+}
+
+model ReviewMedia {
+  id       String @id @default(cuid())
+  reviewId String
+  review   Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  url      String
+  type     String // IMAGE | VIDEO
+}
+
+model ReviewReport {
+  id        String   @id @default(cuid())
+  reviewId  String
+  review    Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  reason    String
+  resolved  Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+// ─── Event scenting ────────────────────────────────────────────────────────
+
+model EventInquiry {
+  id              String       @id @default(cuid())
+  reference       String       @unique // EVT-100001
+  fullName        String
+  email           String
+  phone           String
+  eventType       String
+  eventDate       DateTime
+  venue           String
+  guestCount      Int?
+  venueSize       String?
+  fragranceStyle  String?
+  budgetRange     String?
+  requirements    String?
+  status          String       @default("INQUIRY_RECEIVED")
+  quotationAmount Int?
+  depositRequired Int?
+  depositPaid     Int          @default(0)
+  balancePaid     Int          @default(0)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  notes           EventNote[]
+}
+
+model EventNote {
+  id        String       @id @default(cuid())
+  inquiryId String
+  inquiry   EventInquiry @relation(fields: [inquiryId], references: [id], onDelete: Cascade)
+  body      String
+  author    String
+  createdAt DateTime     @default(now())
+}
+
+// ─── Content ───────────────────────────────────────────────────────────────
+
+model PressEntry {
+  id             String       @id @default(cuid())
+  slug           String       @unique
+  kind           String // TV | INTERVIEW | EVENT | COLLABORATION | PORTFOLIO
+  title          String
+  programName    String?
+  eventDate      DateTime?
+  description    String
+  body           String?
+  coverImage     String?
+  videoUrl       String?
+  links          String       @default("[]") // JSON [{label,url}]
+  isPublished    Boolean      @default(false)
+  featureOnHome  Boolean      @default(false)
+  sortOrder      Int          @default(0)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  images         PressImage[]
+}
+
+model PressImage {
+  id           String     @id @default(cuid())
+  pressEntryId String
+  pressEntry   PressEntry @relation(fields: [pressEntryId], references: [id], onDelete: Cascade)
+  url          String
+  caption      String?
+  sortOrder    Int        @default(0)
+}
+
+model JournalPost {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  title       String
+  excerpt     String
+  body        String
+  coverImage  String?
+  isPublished Boolean   @default(false)
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+}
+
+model MediaAsset {
+  id        String   @id @default(cuid())
+  url       String
+  filename  String
+  mimeType  String
+  sizeBytes Int
+  alt       String   @default("")
+  createdAt DateTime @default(now())
+}
+
+model SiteSetting {
+  key       String   @id
+  value     String // JSON
+  updatedAt DateTime @updatedAt
+}
+
+model NewsletterSubscriber {
+  id               String    @id @default(cuid())
+  email            String    @unique
+  status           String    @default("SUBSCRIBED") // SUBSCRIBED | UNSUBSCRIBED
+  consentText      String
+  consentAt        DateTime
+  source           String
+  unsubscribeToken String    @unique
+  unsubscribedAt   DateTime?
+}
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String
+  message   String
+  handled   Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model AdminNotification {
+  id        String    @id @default(cuid())
+  type      String // LOW_STOCK | NEW_ORDER | PAYMENT_REVIEW | EVENT_INQUIRY | REVIEW_REPORTED
+  message   String
+  link      String?
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+}
+
+// Transactional email queue. Messages are written here and delivered by the
+// configured email provider (console logger in development).
+model EmailOutbox {
+  id        String    @id @default(cuid())
+  to        String
+  subject   String
+  body      String
+  sentAt    DateTime?
+  error     String?
+  createdAt DateTime  @default(now())
+}
+
+model Counter {
+  name  String @id
+  value Int
+}

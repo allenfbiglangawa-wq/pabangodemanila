@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1400" preserveAspectRatio="xMidYMid slice">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FBFAF7"/><stop offset="1" stop-color="#EFEBE2"/></linearGradient>
+<radialGradient id="glow" cx="0.3" cy="0.2" r="0.9"><stop offset="0" stop-color="#FFFFFF" stop-opacity="0.9"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/></radialGradient>
+<linearGradient id="glass" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#E9DFCD"/><stop offset="0.45" stop-color="#F8F3EA"/><stop offset="1" stop-color="#D7C4AB"/></linearGradient>
+<linearGradient id="gold" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#B39668"/><stop offset="0.5" stop-color="#D9C4A0"/><stop offset="1" stop-color="#A88B5E"/></linearGradient>
+</defs>
+<rect width="1200" height="1400" fill="url(#bg)"/><rect width="1200" height="1400" fill="url(#glow)"/>
+<rect x="200" y="200" width="800" height="1000" fill="none" stroke="#D7C4AB"/><circle cx="600" cy="640" r="220" fill="none" stroke="#C4AB82" stroke-width="1.5"/><path d="M600 470 C 700 560 700 720 600 810 C 500 720 500 560 600 470 Z" fill="#EFE6D6" stroke="#C4AB82" stroke-width="1.5"/>
+<text x="600" y="1372" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="13" letter-spacing="4" fill="#A79D8E">PLACEHOLDER IMAGE</text>
+</svg>
