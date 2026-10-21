@@ -25,7 +25,7 @@ export const SETTING_DEFAULTS = {
     secondaryLabel: "Discover Our Story",
     secondaryHref: "/our-story",
     videoUrl: "",
-    posterImage: "/brand/diffuser-oil-dropper.jpg",
+    posterImage: "/brand/aroma-diffuser-oils.jpg",
     tagline: "A Philosophy of Scented Living",
   },
   story: {
@@ -36,7 +36,7 @@ export const SETTING_DEFAULTS = {
       "Today every Pabango de Manila piece is formulated with laboratory discipline and finished by hand. Jules’s grounding in chemistry, from a 720-hour internship at the Philippine Textile Research Institute of the DOST, and her training in scent creation under certified perfumer Ms. Bernadette Lim guide a quality-controlled process, from pour temperature and wick testing to cure time and burn performance.",
       "We work with soy wax, beeswax and Philippine coconut oil, phthalate-free fragrance oils, and cotton or wooden wicks. Our gift boxes are made of paper maché by artisans in Pakil, Laguna, and our team includes working students, single parents and homemakers returning to work. We believe fragrance can do more than scent a room: it can soothe minds and transform lives.",
     ].join("\n\n"),
-    image: "/brand/aroma-diffuser-oils.jpg",
+    image: "/brand/diffuser-oil-dropper.jpg",
     isPlaceholder: false,
   },
   eventScenting: {
@@ -76,6 +76,25 @@ export const SETTING_DEFAULTS = {
       "/brand/zeinab-harake-27th-birthday.jpg | Pabango de Manila scent styling at Zeinab Harake's 27th birthday",
       "/brand/event-guests-gift-bags.jpg | Guests with Pabango de Manila gift bags at the Urban Smiles Clinic thanksgiving",
       "/brand/perfect-mornings-display.jpg | Pabango de Manila display on the Perfect Mornings set",
+    ],
+  },
+  // Homepage media sections. Image lines are "image URL | caption"; the owner will manage these
+  // from the Media Library (upload) and Website Content (choose and caption) without code changes.
+  spotlight: {
+    eyebrow: "In the Spotlight",
+    heading: "A Story Worth Sharing",
+    intro: "Pabango de Manila began in 2021 in a small condo in Makati, when our founder Jules turned her background in science into hand-poured candles with a cleaner burn and a fuller scent throw. Since then, our story of homegrown Filipino fragrance has been shared on television and in print.",
+    image: "/brand/perfect-mornings-set.jpg | Our founder with the host on the set of Perfect Mornings, One PH",
+    secondaryImage: "/brand/perfect-mornings-display.jpg | Pabango de Manila candles, sprays and oils on the Perfect Mornings set",
+    videoUrl: "", // the official interview link; the Watch button stays hidden until this is set
+  },
+  moments: {
+    eyebrow: "Moments & Milestones",
+    heading: "Where Fragrance Meets Memorable Moments",
+    featured: "/brand/zeinab-harake-27th-birthday.jpg | The Pabango de Manila fragrance display at Zeinab Harake's 27th birthday celebration",
+    gallery: [
+      "/brand/event-guests-gift-bags.jpg | Guests with Pabango de Manila gift bags",
+      "/brand/event-guests-rooftop.jpg | Celebrating with a guest at a Pabango de Manila event",
     ],
   },
   stockists: {

@@ -12,7 +12,7 @@ const TABS = [
   ["story", "Brand story"],
   ["events", "Event scenting"],
   ["business", "Private label & stockists"],
-  ["home", "Instagram, reviews & newsletter"],
+  ["home", "Homepage media & reviews"],
   ["press", "Press & events"],
   ["journal", "Journal"],
   ["contact", "Contact & footer"],
@@ -75,9 +75,12 @@ export default async function ContentAdmin({ searchParams }: { searchParams: Pro
     );
   } else if (tab === "home") {
     const [ig, nl, ext] = await Promise.all([getSetting("instagram"), getSetting("newsletter"), getSetting("externalReviews")]);
+    const [sp, mo] = await Promise.all([getSetting("spotlight"), getSetting("moments")]);
     body = (
       <div className="space-y-6">
         <Form group="instagram"><Field label="Instagram profile URL" name="profileUrl" defaultValue={ig.profileUrl} /><TextArea label="Approved gallery images (one per line: image URL | alt text | post link)" name="images" defaultValue={ig.images.map((i) => [i.url, i.alt, i.link].join(" | ")).join("\n")} rows={6} hint="Upload your own approved photos to the Media Library and paste their URLs. No scraping is used." /></Form>
+        <Form group="spotlight"><Field label="In the Spotlight: eyebrow" name="eyebrow" defaultValue={sp.eyebrow} /><Field label="Heading" name="heading" defaultValue={sp.heading} /><TextArea label="Introduction" name="intro" defaultValue={sp.intro} rows={3} /><Field label="Main photo (image URL | caption)" name="image" defaultValue={sp.image} hint="Upload in Media Library, then paste the URL here." /><Field label="Second photo (image URL | caption, optional)" name="secondaryImage" defaultValue={sp.secondaryImage} /><Field label="Official interview video link" name="videoUrl" defaultValue={sp.videoUrl} hint="The Watch Our Story button only appears when this is set." /></Form>
+        <Form group="moments"><Field label="Moments & Milestones: eyebrow" name="eyebrow" defaultValue={mo.eyebrow} /><Field label="Heading" name="heading" defaultValue={mo.heading} /><Field label="Featured photo (image URL | caption)" name="featured" defaultValue={mo.featured} /><TextArea label="Gallery (one per line: image URL | caption)" name="gallery" defaultValue={mo.gallery.join("\n")} rows={5} hint="Use verified captions only, and only photos you have permission to publish." /></Form>
         <Form group="externalReviews"><TextArea label="Customer feedback from other channels (one per line: name | source | product | quote)" name="items" defaultValue={ext.items.join("\n")} rows={4} hint="Only genuine feedback you received, e.g. a Shopee review, with the customer's permission. It is shown with its source and is never counted as a website review." /></Form>
         <Form group="newsletter"><Field label="Heading" name="heading" defaultValue={nl.heading} /><TextArea label="Text" name="body" defaultValue={nl.body} rows={2} /><TextArea label="Consent statement shown next to the checkbox" name="consentText" defaultValue={nl.consentText} rows={2} /></Form>
       </div>
