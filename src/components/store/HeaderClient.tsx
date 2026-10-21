@@ -45,7 +45,7 @@ export function HeaderClient({ cartCount, wishlistCount }: { cartCount: number; 
             <MenuIcon />
           </button>
           <Link href="/" className="flex items-center gap-3 font-serif text-[22px] tracking-[0.32em] whitespace-nowrap min-[1720px]:text-[19px] min-[1720px]:tracking-[0.28em]" aria-label="Pabango de Manila — home">
-            <Image src="/brand/pdm-logo-mark.jpg" alt="PDM" width={1185} height={505} priority className={`w-auto rounded-[2px] transition-all duration-500 ${compact ? "h-10" : "h-11 lg:h-14"}`} />
+            <Image src="/brand/pdm-logo-mark.png" alt="PDM" width={970} height={360} priority className={`w-auto transition-all duration-500 ${compact ? "h-7" : "h-8 lg:h-10"}`} />
             <span className="hidden sm:inline xl:hidden min-[1720px]:inline">PABANGO <span className="text-champagne-deep">DE</span> MANILA</span>
           </Link>
         </div>
