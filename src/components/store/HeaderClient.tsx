@@ -39,17 +39,17 @@ export function HeaderClient({ cartCount, wishlistCount }: { cartCount: number; 
   return (
     <header className={`sticky top-0 z-40 border-b bg-pearl/95 backdrop-blur transition-all duration-500 ${compact ? "border-line" : "border-transparent"}`}>
       <div className={`container-luxe flex items-center justify-between gap-3 sm:gap-6 transition-all duration-500 ${compact ? "h-16" : "h-20 lg:h-24"}`}>
-        <div className="flex min-w-0 items-center gap-1 sm:gap-3">
+        <div className="flex shrink-0 items-center gap-1 sm:gap-3">
           <button className="-ml-2 p-2 xl:hidden" onClick={() => setOpen(true)} aria-label="Open menu" aria-expanded={open}>
             <MenuIcon />
           </button>
-          <Link href="/" className="font-serif text-[15px] tracking-[0.22em] whitespace-nowrap sm:text-[22px] sm:tracking-[0.32em] xl:text-[19px] xl:tracking-[0.28em] 2xl:text-[22px] 2xl:tracking-[0.32em]" aria-label="Pabango de Manila — home">
+          <Link href="/" className="font-serif text-[15px] tracking-[0.22em] whitespace-nowrap sm:text-[22px] sm:tracking-[0.32em] xl:text-[18px] xl:tracking-[0.26em] 2xl:text-[20px] 2xl:tracking-[0.3em]" aria-label="Pabango de Manila — home">
             PABANGO <span className="text-champagne-deep">DE</span> MANILA
           </Link>
         </div>
 
-        <nav className="hidden xl:block" aria-label="Main">
-          <ul className="flex items-center gap-5 2xl:gap-8">
+        <nav className="hidden min-w-0 xl:block" aria-label="Main">
+          <ul className="flex items-center gap-4 2xl:gap-7">
             {NAV.filter((n) => n.href !== "/").map((n) => {
               const active = n.href === "/" ? pathname === "/" : pathname.startsWith(n.href);
               return (
