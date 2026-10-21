@@ -73,23 +73,29 @@ finishes that adapter in `src/lib/payments/` and sets `PAYMENT_PROVIDER` and
 the keys. Until then the live site hides GCash, Maya and card payments and
 accepts bank transfer only (and cash on delivery, if switched on).
 
-## Deploying
+## Deploying (Vercel)
 
-1. **Database:** create a PostgreSQL database (Supabase, Neon, Railway, etc.),
-   change `provider = "sqlite"` to `"postgresql"` in `prisma/schema.prisma`,
-   set `DATABASE_URL`, then run `npx prisma db push` and `npm run db:seed`.
-2. **Hosting:** any Node host (Vercel, Railway, Render, a VPS). Set every
-   variable above. Uploads are written to `public/uploads`, which suits a VPS or
-   a persistent disk. On Vercel or other serverless hosts, switch
-   `src/lib/storage.ts` to object storage (S3, R2, Supabase Storage) first.
-3. **Scheduler:** every 5–10 minutes call
-   `POST /api/cron/release-reservations` with header
-   `Authorization: Bearer $CRON_SECRET`. This frees stock held by unpaid orders.
-4. **Email:** messages are queued in the `EmailOutbox` table and printed to the
-   console. Connect a transactional email service in `src/lib/email.ts`
-   before launch.
-5. **Webhook:** register `https://<your-domain>/api/webhooks/payments/<provider>`
-   in the payment provider dashboard.
+The repo is set up for Vercel (`vercel.json`, `scripts/vercel-build.sh`). The
+build switches Prisma to PostgreSQL, syncs the schema (never drops data), runs
+the seed (never overwrites admin edits) and builds the site.
+
+1. Import the GitHub repo in Vercel.
+2. **Storage tab:** add a Neon Postgres database (sets `DATABASE_URL`) and a
+   Blob store (sets `BLOB_READ_WRITE_TOKEN`, used for admin uploads).
+3. **Environment variables:** `NEXT_PUBLIC_SITE_URL`, `APP_SECRET`,
+   `CRON_SECRET`, `PAYMENT_PROVIDER=stub` (online payments stay hidden until a
+   provider is set up), `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD` (10+
+   characters; the build refuses to run without them), `SEED_DEMO_STOCK=0`.
+4. Deploy. The daily cron in `vercel.json` releases stock held by unpaid
+   orders and sends queued emails.
+5. **Email:** messages are queued in the `EmailOutbox` table. Connect a
+   transactional email service in `src/lib/email.ts` before relying on them.
+6. **Webhook:** once a payment provider is chosen, register
+   `https://<your-domain>/api/webhooks/payments/<provider>` in its dashboard.
+
+Other Node hosts work too: use PostgreSQL, run `bash scripts/vercel-build.sh`
+as the build, and either set `BLOB_READ_WRITE_TOKEN` or keep a persistent disk
+for `public/uploads`.
 
 ## Before launch (the owner's checklist)
 

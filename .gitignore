@@ -7,3 +7,4 @@ public/uploads/*
 !public/uploads/.gitkeep
 next-env.d.ts
 *.tsbuildinfo
+prisma/schema.postgres.prisma

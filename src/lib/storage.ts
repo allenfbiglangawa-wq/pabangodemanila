@@ -1,13 +1,14 @@
 import "server-only";
 import { mkdir, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { del, put } from "@vercel/blob";
 import { randomToken } from "./crypto";
 
 /**
- * Local-disk storage for uploaded media (public/uploads). For production on
- * serverless hosting, replace these two functions with an object-storage
- * client (S3, Cloudflare R2, Supabase Storage…) — callers only use the URL.
+ * Uploaded media goes to Vercel Blob when BLOB_READ_WRITE_TOKEN is set (production
+ * on Vercel), otherwise to local disk under public/uploads. Callers only use the URL.
  */
+const useBlob = () => !!process.env.BLOB_READ_WRITE_TOKEN;
 const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads");
 
 const TYPES: Record<string, { ext: string; magic: (b: Buffer) => boolean; kind: "image" | "video" }> = {
@@ -31,13 +32,21 @@ export async function saveUpload(file: File, allow: ("image" | "video")[] = ["im
   if (file.size > limit) throw new UploadError(`File is too large (max ${Math.round(limit / 1024 / 1024)} MB).`);
   const buf = Buffer.from(await file.arrayBuffer());
   if (!t.magic(buf)) throw new UploadError("The file contents do not match its type.");
-  await mkdir(UPLOAD_DIR, { recursive: true });
   const name = `${Date.now()}-${randomToken(9)}.${t.ext}`;
+  if (useBlob()) {
+    const blob = await put(`uploads/${name}`, buf, { access: "public", contentType: file.type });
+    return { url: blob.url, mimeType: file.type, sizeBytes: file.size, kind: t.kind };
+  }
+  await mkdir(UPLOAD_DIR, { recursive: true });
   await writeFile(path.join(UPLOAD_DIR, name), buf);
   return { url: `/uploads/${name}`, mimeType: file.type, sizeBytes: file.size, kind: t.kind };
 }
 
 export async function deleteUpload(url: string) {
+  if (useBlob() && new URL(url, "http://local").hostname.endsWith(".blob.vercel-storage.com")) {
+    await del(url).catch(() => undefined);
+    return;
+  }
   if (!url.startsWith("/uploads/")) return;
   const name = path.basename(url);
   await unlink(path.join(UPLOAD_DIR, name)).catch(() => undefined);

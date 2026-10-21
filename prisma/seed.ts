@@ -19,6 +19,8 @@ const db = new PrismaClient();
 async function main() {
   const email = (process.env.SEED_ADMIN_EMAIL ?? "owner@example.com").toLowerCase();
   const password = process.env.SEED_ADMIN_PASSWORD ?? "ChangeMe!2026";
+  if (process.env.VERCEL && (!process.env.SEED_ADMIN_EMAIL || !process.env.SEED_ADMIN_PASSWORD || password.length < 10))
+    throw new Error("Set SEED_ADMIN_EMAIL and a SEED_ADMIN_PASSWORD of at least 10 characters before deploying.");
   await db.user.upsert({
     where: { email },
     update: {},

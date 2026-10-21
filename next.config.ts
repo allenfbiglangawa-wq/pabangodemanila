@@ -9,8 +9,8 @@ const securityHeaders = [
 
 const config: NextConfig = {
   images: {
-    // Add your CDN / storage host here when media moves off local disk.
-    remotePatterns: [],
+    // Vercel Blob (admin uploads in production).
+    remotePatterns: [{ protocol: "https", hostname: "*.public.blob.vercel-storage.com" }],
   },
   experimental: { serverActions: { bodySizeLimit: "12mb" } },
   async headers() {
