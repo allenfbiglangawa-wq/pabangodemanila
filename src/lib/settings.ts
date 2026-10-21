@@ -168,7 +168,7 @@ export const SETTING_DEFAULTS = {
   seo: {
     title: "Pabango de Manila",
     description: "Filipino artisanal home fragrance: soy candles, reed diffusers, room and linen sprays and aroma diffuser oils, hand-poured in Parañaque. Private label and business scenting available.",
-    ogImage: "/placeholders/og.svg",
+    ogImage: "/brand/og-image.jpg",
     googleSiteVerification: "",
   },
 };

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -43,12 +44,13 @@ export function HeaderClient({ cartCount, wishlistCount }: { cartCount: number; 
           <button className="-ml-2 p-2 xl:hidden" onClick={() => setOpen(true)} aria-label="Open menu" aria-expanded={open}>
             <MenuIcon />
           </button>
-          <Link href="/" className="font-serif text-[15px] tracking-[0.22em] whitespace-nowrap sm:text-[22px] sm:tracking-[0.32em] xl:text-[18px] xl:tracking-[0.26em] 2xl:text-[20px] 2xl:tracking-[0.3em]" aria-label="Pabango de Manila — home">
-            PABANGO <span className="text-champagne-deep">DE</span> MANILA
+          <Link href="/" className="flex items-center gap-3 font-serif text-[22px] tracking-[0.32em] whitespace-nowrap min-[1720px]:text-[19px] min-[1720px]:tracking-[0.28em]" aria-label="Pabango de Manila — home">
+            <Image src="/brand/pdm-logo-mark.jpg" alt="PDM" width={1185} height={505} priority className={`w-auto rounded-[2px] transition-all duration-500 ${compact ? "h-10" : "h-11 lg:h-14"}`} />
+            <span className="hidden sm:inline xl:hidden min-[1720px]:inline">PABANGO <span className="text-champagne-deep">DE</span> MANILA</span>
           </Link>
         </div>
 
-        <nav className="hidden min-w-0 xl:block" aria-label="Main">
+        <nav className="hidden min-w-0 flex-1 justify-center px-4 xl:flex" aria-label="Main">
           <ul className="flex items-center gap-4 2xl:gap-7">
             {NAV.filter((n) => n.href !== "/").map((n) => {
               const active = n.href === "/" ? pathname === "/" : pathname.startsWith(n.href);

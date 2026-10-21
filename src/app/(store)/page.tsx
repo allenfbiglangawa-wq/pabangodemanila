@@ -137,11 +137,11 @@ export default async function HomePage() {
       <section className="bg-ivory py-24 lg:py-32" aria-labelledby="spotlight-heading">
         <div className="container-luxe grid items-center gap-14 lg:grid-cols-12 lg:gap-16">
           <div className="relative lg:col-span-7">
-            <figure className="relative aspect-[4/5] overflow-hidden sm:aspect-[5/4] lg:aspect-[6/5]">
-              <Media src={spotImg[0]} alt={spotImg[1]} sizes="(min-width:1024px) 55vw, 100vw" className="object-[center_35%] transition-transform duration-700 hover:scale-[1.02]" />
+            <figure className="relative aspect-[4/5] w-full overflow-hidden sm:w-[72%] lg:w-[75%]">
+              <Media src={spotImg[0]} alt={spotImg[1]} sizes="(min-width:1024px) 45vw, 100vw" className="object-top transition-transform duration-700 hover:scale-[1.02]" />
             </figure>
             {spotImg2[0] && (
-              <figure className="absolute -bottom-10 right-4 hidden w-[34%] border-[6px] border-ivory shadow-sm sm:block lg:-right-8">
+              <figure className="absolute -bottom-10 right-0 hidden w-[40%] border-[6px] border-ivory shadow-sm sm:block lg:-right-8">
                 <div className="relative aspect-[4/5]"><Media src={spotImg2[0]} alt={spotImg2[1]} sizes="20vw" /></div>
               </figure>
             )}
@@ -183,17 +183,17 @@ export default async function HomePage() {
             <h2 id="moments-heading" className="display mx-auto max-w-2xl text-5xl lg:text-6xl">{moments.heading}</h2>
           </div>
           <div className="mt-16 grid gap-5 lg:grid-cols-12">
-            <figure className="lg:col-span-7">
+            <figure className="lg:col-span-4">
               <div className="relative aspect-[4/5] overflow-hidden bg-ivory">
-                <Media src={momentsFeatured[0]} alt={momentsFeatured[1]} sizes="(min-width:1024px) 58vw, 100vw" className="transition-transform duration-700 hover:scale-[1.02]" />
+                <Media src={momentsFeatured[0]} alt={momentsFeatured[1]} sizes="(min-width:1024px) 33vw, 100vw" className="object-top transition-transform duration-700 hover:scale-[1.02]" />
               </div>
               {momentsFeatured[1] && <figcaption className="mt-3 text-[13px] text-muted">{momentsFeatured[1]}</figcaption>}
             </figure>
-            <div className="grid grid-cols-2 content-start gap-5 lg:col-span-5 lg:grid-cols-1">
+            <div className="grid grid-cols-2 content-start gap-5 lg:col-span-8">
               {momentsGallery.map(([url, caption], i) => (
                 <figure key={i}>
-                  <div className="relative aspect-[4/5] overflow-hidden bg-ivory lg:aspect-[6/5]">
-                    <Media src={url} alt={caption} sizes="(min-width:1024px) 40vw, 50vw" className="object-[center_30%] transition-transform duration-700 hover:scale-[1.03]" />
+                  <div className="relative aspect-[4/5] overflow-hidden bg-ivory">
+                    <Media src={url} alt={caption} sizes="(min-width:1024px) 33vw, 50vw" className="object-top transition-transform duration-700 hover:scale-[1.03]" />
                   </div>
                   {caption && <figcaption className="mt-2 text-[12px] leading-snug text-muted">{caption}</figcaption>}
                 </figure>

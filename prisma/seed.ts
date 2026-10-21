@@ -30,7 +30,7 @@ async function main() {
   const categories = [
     { slug: "scented-candles", name: "Scented Candles", imageUrl: "/brand/candles/london-bloom.jpg", sortOrder: 1, description: "Hand-poured soy candles, cured for 3–7 days for a cleaner burn and fuller scent throw." },
     { slug: "room-linen-sprays", name: "Room & Linen Sprays", imageUrl: "/brand/room-linen-sprays.jpg", sortOrder: 2, description: "Phthalate-free perfumed sprays for rooms and linens." },
-    { slug: "reed-diffusers", name: "Reed Diffusers", imageUrl: "/placeholders/diffuser.svg", sortOrder: 3, description: "Steady, flameless scent diffusion for any room." },
+    { slug: "reed-diffusers", name: "Reed Diffusers", imageUrl: "/brand/oasis-reed-diffuser.jpg", sortOrder: 3, description: "Steady, flameless scent diffusion for any room." },
     { slug: "humidifier-oils", name: "Aroma Diffuser Oils", imageUrl: "/brand/aroma-diffuser-oils.jpg", sortOrder: 4, description: "Fragrance oils made for humidifiers and electric aroma diffusers." },
     { slug: "gift-sets", name: "Gift Sets", imageUrl: "/placeholders/giftbox.svg", sortOrder: 5, description: "Gift sets in handmade paper maché boxes from Pakil, Laguna." },
   ];
@@ -67,7 +67,7 @@ async function main() {
       retire: ["PDM-SPRY-85"],
       description: "A phthalate-free perfumed mist for rooms, linens and fabrics, formulated for long-lasting freshness. 85 ml, in six signature scents." },
     { slug: "reed-diffuser", name: "Reed Diffuser", cat: "reed-diffusers", featured: true,
-      images: [{ url: "/placeholders/diffuser.svg", alt: "Reed Diffuser (placeholder image)" }],
+      images: [{ url: "/brand/oasis-reed-diffuser.jpg", alt: "Pabango de Manila Oasis Reed Diffuser in an amber glass bottle" }],
       variants: [{ sku: "PDM-DIFF-100", name: "100 ml", price: 44800 }],
       description: "Flameless home fragrance crafted for steady, even scent diffusion, tested in our studio for consistent throw." },
     { slug: "aroma-diffuser-oil", name: "Aroma Diffuser Oil", cat: "humidifier-oils", featured: true,
