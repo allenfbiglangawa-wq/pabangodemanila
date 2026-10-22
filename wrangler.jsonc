@@ -1,0 +1,19 @@
+// Cloudflare Workers deployment (built by scripts/cloudflare-build.sh).
+// Secrets (DATABASE_URL, APP_SECRET, CRON_SECRET) are set in the Cloudflare
+// dashboard, never here.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "pabangodemanila",
+  "main": "cloudflare/worker.ts",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
+  "observability": { "enabled": true },
+  "vars": {
+    "PRISMA_ADAPTER": "pg",
+    "UPLOAD_STORAGE": "database",
+    "PAYMENT_PROVIDER": "stub"
+  },
+  // Release stock held by unpaid orders and send queued emails.
+  "triggers": { "crons": ["*/15 * * * *"] }
+}

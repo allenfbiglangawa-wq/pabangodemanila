@@ -9,17 +9,17 @@
  *  - the owner's photos registered in the Media Library
  * No reviews, orders, testimonials or business figures are created.
  */
-import { PrismaClient } from "@prisma/client";
+import { createClient } from "../src/lib/db";
 import bcrypt from "bcryptjs";
 import fs from "node:fs";
 import path from "node:path";
 
-const db = new PrismaClient();
+const db = createClient();
 
 async function main() {
   const email = (process.env.SEED_ADMIN_EMAIL ?? "owner@example.com").toLowerCase();
   const password = process.env.SEED_ADMIN_PASSWORD ?? "ChangeMe!2026";
-  if (process.env.VERCEL && (!process.env.SEED_ADMIN_EMAIL || !process.env.SEED_ADMIN_PASSWORD || password.length < 10))
+  if ((process.env.VERCEL || process.env.BUILD_TARGET === "cloudflare") && (!process.env.SEED_ADMIN_EMAIL || !process.env.SEED_ADMIN_PASSWORD || password.length < 10))
     throw new Error("Set SEED_ADMIN_EMAIL and a SEED_ADMIN_PASSWORD of at least 10 characters before deploying.");
   await db.user.upsert({
     where: { email },

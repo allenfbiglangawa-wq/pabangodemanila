@@ -73,29 +73,39 @@ finishes that adapter in `src/lib/payments/` and sets `PAYMENT_PROVIDER` and
 the keys. Until then the live site hides GCash, Maya and card payments and
 accepts bank transfer only (and cash on delivery, if switched on).
 
-## Deploying (Vercel)
+## Deploying (Cloudflare Workers)
 
-The repo is set up for Vercel (`vercel.json`, `scripts/vercel-build.sh`). The
-build switches Prisma to PostgreSQL, syncs the schema (never drops data), runs
-the seed (never overwrites admin edits) and builds the site.
+The live site runs on Cloudflare Workers through OpenNext (`wrangler.jsonc`,
+`open-next.config.ts`, `cloudflare/worker.ts`). The build script
+`scripts/cloudflare-build.sh` switches Prisma to PostgreSQL (through the `pg`
+driver adapter), syncs the schema (never drops data), runs the seed (never
+overwrites admin edits) and builds the worker. Uploads are stored in the
+database and served from `/media/...`; a cron trigger every 15 minutes releases
+stock held by unpaid orders and sends queued emails.
 
-1. Import the GitHub repo in Vercel.
-2. **Storage tab:** add a Neon Postgres database (sets `DATABASE_URL`) and a
-   Blob store (sets `BLOB_READ_WRITE_TOKEN`, used for admin uploads).
-3. **Environment variables:** `NEXT_PUBLIC_SITE_URL`, `APP_SECRET`,
-   `CRON_SECRET`, `PAYMENT_PROVIDER=stub` (online payments stay hidden until a
-   provider is set up), `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD` (10+
-   characters; the build refuses to run without them), `SEED_DEMO_STOCK=0`.
-4. Deploy. The daily cron in `vercel.json` releases stock held by unpaid
-   orders and sends queued emails.
-5. **Email:** messages are queued in the `EmailOutbox` table. Connect a
-   transactional email service in `src/lib/email.ts` before relying on them.
-6. **Webhook:** once a payment provider is chosen, register
-   `https://<your-domain>/api/webhooks/payments/<provider>` in its dashboard.
+In Cloudflare: Workers & Pages › Create › Import a repository, then
+- Build command `bash scripts/cloudflare-build.sh`, deploy command `npx wrangler deploy`.
+- **Build variables:** `DATABASE_URL` (direct `postgres://` URL), `SEED_ADMIN_EMAIL`,
+  `SEED_ADMIN_PASSWORD` (10+ characters; the build refuses a missing or short one),
+  `SEED_DEMO_STOCK=0`.
+- **Runtime variables and secrets:** `DATABASE_URL`, `APP_SECRET`, `CRON_SECRET`,
+  `SITE_URL` (the public address). `PRISMA_ADAPTER`, `UPLOAD_STORAGE` and
+  `PAYMENT_PROVIDER` are set in `wrangler.jsonc`.
 
-Other Node hosts work too: use PostgreSQL, run `bash scripts/vercel-build.sh`
-as the build, and either set `BLOB_READ_WRITE_TOKEN` or keep a persistent disk
-for `public/uploads`.
+The worker is about 2.4 MB gzipped, within the free plan's 3 MB limit.
+
+### Vercel (alternative)
+
+`vercel.json` and `scripts/vercel-build.sh` still work: add a Postgres database
+and a Blob store in Vercel, set the same variables plus `NEXT_PUBLIC_SITE_URL`,
+and deploy.
+
+### Before relying on email or online payments
+
+- **Email:** messages are queued in the `EmailOutbox` table. Connect a
+  transactional email service in `src/lib/email.ts`.
+- **Webhook:** once a payment provider is chosen, register
+  `https://<your-domain>/api/webhooks/payments/<provider>` in its dashboard.
 
 ## Before launch (the owner's checklist)
 

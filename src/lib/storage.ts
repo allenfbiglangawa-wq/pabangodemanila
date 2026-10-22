@@ -1,14 +1,16 @@
 import "server-only";
 import { mkdir, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { del, put } from "@vercel/blob";
 import { randomToken } from "./crypto";
+import { db } from "./db";
 
 /**
- * Uploaded media goes to Vercel Blob when BLOB_READ_WRITE_TOKEN is set (production
- * on Vercel), otherwise to local disk under public/uploads. Callers only use the URL.
+ * Uploaded media goes to Vercel Blob when BLOB_READ_WRITE_TOKEN is set, to the
+ * database when UPLOAD_STORAGE=database (Cloudflare, served by /media/[key]),
+ * otherwise to local disk under public/uploads. Callers only use the URL.
  */
 const useBlob = () => !!process.env.BLOB_READ_WRITE_TOKEN;
+const useDatabase = () => process.env.UPLOAD_STORAGE === "database";
 const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads");
 
 const TYPES: Record<string, { ext: string; magic: (b: Buffer) => boolean; kind: "image" | "video" }> = {
@@ -33,7 +35,12 @@ export async function saveUpload(file: File, allow: ("image" | "video")[] = ["im
   const buf = Buffer.from(await file.arrayBuffer());
   if (!t.magic(buf)) throw new UploadError("The file contents do not match its type.");
   const name = `${Date.now()}-${randomToken(9)}.${t.ext}`;
+  if (useDatabase()) {
+    await db.storedFile.create({ data: { key: name, mimeType: file.type, data: buf } });
+    return { url: `/media/${name}`, mimeType: file.type, sizeBytes: file.size, kind: t.kind };
+  }
   if (useBlob()) {
+    const { put } = await import("@vercel/blob"); // loaded only on Vercel
     const blob = await put(`uploads/${name}`, buf, { access: "public", contentType: file.type });
     return { url: blob.url, mimeType: file.type, sizeBytes: file.size, kind: t.kind };
   }
@@ -43,7 +50,12 @@ export async function saveUpload(file: File, allow: ("image" | "video")[] = ["im
 }
 
 export async function deleteUpload(url: string) {
+  if (url.startsWith("/media/")) {
+    await db.storedFile.deleteMany({ where: { key: path.basename(url) } });
+    return;
+  }
   if (useBlob() && new URL(url, "http://local").hostname.endsWith(".blob.vercel-storage.com")) {
+    const { del } = await import("@vercel/blob");
     await del(url).catch(() => undefined);
     return;
   }

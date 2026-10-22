@@ -13,7 +13,8 @@ export function splitNotes(notes: string | null | undefined): string[] {
 }
 
 export function siteUrl(path = ""): string {
-  const base = (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, "");
+  // SITE_URL is read at runtime (Cloudflare); NEXT_PUBLIC_SITE_URL is fixed at build time.
+  const base = (process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/$/, "");
   return base + path;
 }
 

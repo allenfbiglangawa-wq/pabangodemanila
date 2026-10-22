@@ -8,3 +8,6 @@ public/uploads/*
 next-env.d.ts
 *.tsbuildinfo
 prisma/schema.postgres.prisma
+.open-next
+.wrangler
+.dev.vars

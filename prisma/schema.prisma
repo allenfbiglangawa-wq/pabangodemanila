@@ -471,6 +471,14 @@ model MediaAsset {
   createdAt DateTime @default(now())
 }
 
+// Uploaded file contents, used where the host has no writable disk (Cloudflare).
+model StoredFile {
+  key       String   @id
+  mimeType  String
+  data      Bytes
+  createdAt DateTime @default(now())
+}
+
 model SiteSetting {
   key       String   @id
   value     String // JSON
