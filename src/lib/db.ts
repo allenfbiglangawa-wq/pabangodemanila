@@ -14,13 +14,15 @@ function createClient(): PrismaClient {
     return new PrismaClient({ adapter: new PrismaPg({ connectionString: databaseUrl() }) });
   }
   const url = databaseUrl();
-  return new PrismaClient(url !== process.env.DATABASE_URL ? { datasourceUrl: url } : undefined);
+  return new PrismaClient(url && url !== process.env.DATABASE_URL ? { datasourceUrl: url } : undefined);
 }
 
 /** Vercel/Prisma Postgres may set only POSTGRES_URL, or an Accelerate URL in DATABASE_URL. */
 function databaseUrl() {
-  const dbUrl = process.env.DATABASE_URL;
-  return (!dbUrl || dbUrl.startsWith("prisma+")) && process.env.POSTGRES_URL ? process.env.POSTGRES_URL : dbUrl;
+  const clean = (v?: string) => v?.replace(/["'\s]/g, "") || undefined; // stray quotes/spaces pasted into a dashboard
+  const dbUrl = clean(process.env.DATABASE_URL);
+  const pgUrl = clean(process.env.POSTGRES_URL);
+  return (!dbUrl || dbUrl.startsWith("prisma+")) && pgUrl ? pgUrl : dbUrl;
 }
 
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
