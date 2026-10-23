@@ -7,7 +7,7 @@ const buckets = new Map<string, { count: number; resetAt: number }>();
 
 export async function clientIp(): Promise<string> {
   const h = await headers();
-  return h.get("x-forwarded-for")?.split(",")[0]?.trim() || h.get("x-real-ip") || "unknown";
+  return h.get("cf-connecting-ip") || h.get("x-forwarded-for")?.split(",")[0]?.trim() || h.get("x-real-ip") || "unknown";
 }
 
 export async function rateLimit(scope: string, limit: number, windowMs: number): Promise<boolean> {
