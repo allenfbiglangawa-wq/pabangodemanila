@@ -31,7 +31,7 @@ export function QuickView({ p }: { p: ProductCardData }) {
           <div className="grid md:grid-cols-2">
             <div className="relative aspect-[4/5] bg-ivory">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={p.image ?? "/placeholders/bottle-1.svg"} alt={p.name} className="h-full w-full object-cover" />
+              <img src={p.image ?? "/placeholders/bottle-1.svg"} alt={p.name} className="h-full w-full object-contain" />
             </div>
             <div className="relative space-y-5 p-8 md:p-10">
               <button className="absolute right-4 top-4 p-2" onClick={() => setOpen(false)} aria-label="Close quick view">

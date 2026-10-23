@@ -42,7 +42,7 @@ export default async function PressEntryPage({ params }: { params: Promise<{ slu
         {embed ? (
           <div className="relative aspect-video bg-charcoal"><iframe src={embed} title={e.title} className="absolute inset-0 h-full w-full" allow="encrypted-media; picture-in-picture" allowFullScreen loading="lazy" /></div>
         ) : (
-          e.coverImage && <div className="relative mx-auto aspect-[4/5] max-w-xl overflow-hidden bg-ivory"><Media src={e.coverImage} alt={e.title} priority sizes="(min-width:640px) 576px, 100vw" className="object-top" /></div>
+          e.coverImage && <div className="relative mx-auto aspect-[4/5] max-w-xl overflow-hidden bg-ivory"><Media src={e.coverImage} alt={e.title} priority sizes="(min-width:640px) 576px, 100vw" /></div>
         )}
       </div>
       {e.videoUrl && !embed && (
@@ -55,7 +55,7 @@ export default async function PressEntryPage({ params }: { params: Promise<{ slu
         <div className="mt-16 grid grid-cols-2 gap-3 md:grid-cols-3">
           {e.images.map((img) => (
             <figure key={img.id}>
-              <div className="relative aspect-[4/5] overflow-hidden bg-ivory"><Media src={img.url} alt={img.caption ?? e.title} sizes="33vw" className="object-top" /></div>
+              <div className="relative aspect-[4/5] overflow-hidden bg-ivory"><Media src={img.url} alt={img.caption ?? e.title} sizes="33vw" /></div>
               {img.caption && <figcaption className="mt-2 text-[12px] text-muted">{img.caption}</figcaption>}
             </figure>
           ))}

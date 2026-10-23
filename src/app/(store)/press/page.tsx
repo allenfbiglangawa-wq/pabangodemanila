@@ -28,7 +28,7 @@ export default async function PressPage({ searchParams }: { searchParams: Promis
           <div className="grid gap-x-8 gap-y-16 sm:grid-cols-2 lg:grid-cols-3">
             {entries.map((e, i) => (
               <Link key={e.id} href={`/press/${e.slug}`} className={`group card-hover block ${i === 0 ? "sm:col-span-2 lg:col-span-3 lg:grid lg:grid-cols-12 lg:items-center lg:gap-14" : ""}`}>
-                <div className={`relative aspect-[4/5] overflow-hidden bg-ivory ${i === 0 ? "lg:col-span-5" : ""}`}><Media src={e.coverImage ?? e.images[0]?.url} alt={e.title} sizes={i === 0 ? "(min-width:1024px) 40vw, 100vw" : "(min-width:1024px) 33vw, 50vw"} className="object-top" /></div>
+                <div className={`relative aspect-[4/5] overflow-hidden bg-ivory ${i === 0 ? "lg:col-span-5" : ""}`}><Media src={e.coverImage ?? e.images[0]?.url} alt={e.title} sizes={i === 0 ? "(min-width:1024px) 40vw, 100vw" : "(min-width:1024px) 33vw, 50vw"} /></div>
                 <div className={i === 0 ? "lg:col-span-7" : ""}>
                   <p className="eyebrow mt-6">{PRESS_KINDS[e.kind as keyof typeof PRESS_KINDS]}{e.eventDate && ` · ${formatDate(e.eventDate, { dateStyle: "long" })}`}</p>
                   <h2 className={`mt-3 font-serif ${i === 0 ? "text-4xl lg:text-5xl" : "text-3xl"}`}>{e.title}</h2>

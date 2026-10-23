@@ -182,7 +182,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                   {r.media.map((m) =>
                     m.type === "IMAGE" ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img key={m.id} src={m.url} alt="Customer photo" className="h-24 w-24 object-cover" loading="lazy" />
+                      <img key={m.id} src={m.url} alt="Customer photo" className="h-24 w-24 bg-ivory object-contain" loading="lazy" />
                     ) : (
                       <a key={m.id} href={m.url} target="_blank" rel="noopener noreferrer nofollow" className="btn-link">Watch video</a>
                     ),
