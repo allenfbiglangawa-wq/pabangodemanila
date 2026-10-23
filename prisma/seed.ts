@@ -66,8 +66,11 @@ async function main() {
   const reed = (code: string, scent: string): V => ({ sku: `PDM-REED-${code}`, name: scent, price: 35800 });
   const products: P[] = [
     { slug: "scented-soy-candle", name: "Scented Soy Candle", cat: "scented-candles", featured: true, best: true,
-      images: [{ url: "/placeholders/candle.svg", alt: "Scented Soy Candle (placeholder image)" }],
-      variants: [{ sku: "PDM-CNDL-150", name: "150 g", price: 31800 }],
+      images: [{ url: "/brand/candles/classic-soy-candles.jpg", alt: "Pabango de Manila classic soy candles in clear glass jars" }],
+      // Scents and price follow the owner's Shopee "Classic 150g" listing (Oct 2026).
+      variants: [["VAN", "French Vanilla"], ["BAM", "Fresh Bamboo"], ["LMT", "Lavender Mint"], ["LVN", "Lavender Vanilla"], ["LRS", "Lavender Rose"], ["FIR", "Christmas Fir"], ["CIN", "Vanilla Cinnamon"]]
+        .map(([code, scent]) => ({ sku: `PDM-CNDL150-${code}`, name: `${scent} · 150 g`, price: 36800 })),
+      retire: ["PDM-CNDL-150"],
       description: "Our classic candle, hand-poured in small batches with a soy wax blend, Philippine coconut oil and phthalate-free fragrance oils, then cured for 3–7 days for a cleaner burn and a fuller scent throw." },
     { slug: "perfumed-room-and-linen-spray", name: "Perfumed Room & Linen Spray", cat: "room-linen-sprays", featured: true, best: true,
       images: [{ url: "/brand/room-linen-sprays.jpg", alt: "Pabango de Manila perfumed room and linen sprays in six scents" }],
