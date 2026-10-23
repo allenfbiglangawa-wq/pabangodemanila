@@ -207,22 +207,31 @@ export async function saveCategory(form: FormData) {
 
 // ─── Inventory ─────────────────────────────────────────────────────────────
 
-export async function adjustStock(form: FormData) {
+// The movement log still records who changed what; the owner asked not to type a reason each time.
+const REASONS: Record<string, string> = { add: "Restock", remove: "Stock removed", set: "Stock count" };
+
+// One form covers the whole inventory table: a row's own Apply button sends `only` with its id,
+// "Save all" sends every row that has a quantity. Rows left blank are skipped.
+export async function adjustStockBulk(form: FormData) {
   const admin = await requireAdmin();
   const back_ = str(form, "back") || "/admin/inventory";
   await run(back_, async () => {
-    const variantId = str(form, "variantId");
-    const mode = str(form, "mode");
-    const qty = int(form, "quantity", NaN);
-    const reason = str(form, "reason");
-    if (!Number.isFinite(qty)) throw new Error("Enter a quantity");
-    if (reason.length < 3) throw new Error("A reason is required for every stock change");
+    const only = str(form, "only");
+    const ids = only ? [only] : form.getAll("variantId").map(String);
+    const changes = ids
+      .map((id) => ({ id, mode: str(form, `mode_${id}`), qty: str(form, `qty_${id}`) }))
+      .filter((c) => c.qty !== "");
+    if (!changes.length) throw new Error("Enter a quantity for at least one item");
+    for (const c of changes) if (!/^\d+$/.test(c.qty)) throw new Error("Quantities must be whole numbers");
     await db.$transaction(async (tx) => {
-      const v = await tx.productVariant.findUniqueOrThrow({ where: { id: variantId } });
-      const delta = mode === "set" ? qty - v.stockOnHand : mode === "remove" ? -Math.abs(qty) : Math.abs(qty);
-      await inventory.adjust(tx, variantId, delta, mode === "add" ? "RESTOCK" : "ADJUSTMENT", reason, admin.id);
+      for (const c of changes) {
+        const qty = parseInt(c.qty, 10);
+        const v = await tx.productVariant.findUniqueOrThrow({ where: { id: c.id } });
+        const delta = c.mode === "set" ? qty - v.stockOnHand : c.mode === "remove" ? -qty : qty;
+        if (delta !== 0) await inventory.adjust(tx, c.id, delta, c.mode === "add" ? "RESTOCK" : "ADJUSTMENT", REASONS[c.mode] ?? "Stock update", admin.id);
+      }
     });
-    return "Stock updated";
+    return changes.length === 1 ? "Stock updated" : `Stock updated for ${changes.length} items`;
   });
 }
 

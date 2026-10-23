@@ -4,7 +4,7 @@ import { requireAdmin } from "@/lib/auth";
 import { available } from "@/lib/inventory";
 import { formatPHP } from "@/lib/money";
 import { expireReservations } from "@/lib/orders";
-import { adjustStock, importInventoryCsv } from "../../actions";
+import { adjustStockBulk, importInventoryCsv } from "../../actions";
 import { Flash, PageTitle } from "@/components/admin/ui";
 
 export default async function InventoryAdmin({ searchParams }: { searchParams: Promise<{ q?: string; filter?: string; ok?: string; error?: string }> }) {
@@ -36,6 +36,12 @@ export default async function InventoryAdmin({ searchParams }: { searchParams: P
         <Link href="/admin/inventory?filter=low" className={`badge border border-line ${sp.filter === "low" ? "bg-charcoal text-pearl" : ""}`}>Low stock</Link>
         <Link href="/admin/inventory?filter=out" className={`badge border border-line ${sp.filter === "out" ? "bg-charcoal text-pearl" : ""}`}>Out of stock</Link>
       </div>
+      <form action={adjustStockBulk}>
+      <input type="hidden" name="back" value={`/admin/inventory${sp.q ? `?q=${encodeURIComponent(sp.q)}` : ""}`} />
+      <div className="mb-3 flex flex-wrap items-center gap-3">
+        <button className="admin-btn">Save all</button>
+        <span className="text-[12px] text-muted">Fill in quantities on as many rows as you like, then Save all. Blank rows are skipped.</span>
+      </div>
       <div className="admin-card overflow-x-auto p-0">
         <table className="admin-table">
           <thead><tr><th>Product / SKU</th><th className="text-right">On hand</th><th className="text-right">Held</th><th className="text-right">Available</th><th className="text-right">Alert at</th><th className="text-right">Value</th><th>Adjust</th></tr></thead>
@@ -49,20 +55,20 @@ export default async function InventoryAdmin({ searchParams }: { searchParams: P
                 <td className="text-right text-muted">{v.lowStockThreshold}</td>
                 <td className="text-right">{v.cost != null ? formatPHP(v.cost * v.stockOnHand) : "—"}</td>
                 <td>
-                  <form action={adjustStock} className="flex flex-wrap gap-1.5">
+                  <div className="flex flex-wrap gap-1.5">
                     <input type="hidden" name="variantId" value={v.id} />
-                    <input type="hidden" name="back" value={`/admin/inventory${sp.q ? `?q=${encodeURIComponent(sp.q)}` : ""}`} />
-                    <select name="mode" className="admin-input !w-24 !py-1 !text-[12px]" aria-label="Adjustment type"><option value="add">Restock +</option><option value="remove">Remove −</option><option value="set">Set to</option></select>
-                    <input name="quantity" type="number" min={0} required className="admin-input !w-16 !py-1 !text-[12px]" aria-label="Quantity" />
-                    <input name="reason" required placeholder="Reason" className="admin-input !w-36 !py-1 !text-[12px]" aria-label="Reason" />
-                    <button className="admin-btn !px-3 !py-1">Apply</button>
-                  </form>
+                    <select name={`mode_${v.id}`} className="admin-input !w-24 !py-1 !text-[12px]" aria-label="Adjustment type"><option value="add">Restock +</option><option value="remove">Remove −</option><option value="set">Set to</option></select>
+                    <input name={`qty_${v.id}`} type="number" min={0} className="admin-input !w-16 !py-1 !text-[12px]" aria-label="Quantity" />
+                    <button name="only" value={v.id} className="admin-btn !px-3 !py-1">Apply</button>
+                  </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+      <div className="mt-3 flex justify-end"><button className="admin-btn">Save all</button></div>
+      </form>
       {admin.role === "ADMIN" && (
         <section className="admin-card mt-6">
           <h2 className="mb-2 text-[13px] font-medium">Import stock from CSV</h2>
