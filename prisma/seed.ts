@@ -99,7 +99,7 @@ async function main() {
     variants: [{ sku: `PDM-PC300-${code}`, name: "300 g", price: 49800 }],
     shippingInfo: "Hand-poured in Manila with a wooden wick. Trim the wick and let the wax melt to the edges on the first burn.",
   });
-  products.push(
+  const candles: P[] = [
     candle("OAS", "oasis-perfumed-candle", "Oasis", "White Floral", "White Lily", "Jasmine, Tuberose", "Sandalwood, Musk",
       "Inspired by the elegance of five-star suites and the quiet stillness of spa mornings, Oasis wraps your senses in delicate white florals, creamy sandalwood and sheer musk.\n\nIt smells like peace: the feeling of stepping into a grand hotel lobby, leaving the noise behind, and simply breathing. Mood: hotel luxury, inner calm, soft power.", true),
     candle("LDN", "london-bloom-perfumed-candle", "London Bloom", "Fruity Floral", "English Pear", "Freesia, Rose", "Soft Woods, Amber",
@@ -116,7 +116,16 @@ async function main() {
       "Inspired by the warm breeze of a sunlit garden in the heart of Tuscany. A radiant medley of orange blossom, jasmine and freesia wrapped in soft woods and musk, a scent that wears like a silk dress on a summer afternoon.\n\nJoyful, sun-kissed and feminine."),
     candle("CDM", "cafe-de-manila-perfumed-candle", "Café de Manila", "Gourmand", "Coffee Bean", "Almond", "Vanilla Bean",
       "Always a favourite, formerly called French Vanilla and now lovingly renamed Café de Manila. It captures the cozy moment of grinding beans in the morning, the first pour of espresso, and the sweet comfort of vanilla in the air.\n\nWarm, familiar and grounded, just like your favourite neighbourhood café. Perfect for slow mornings, journaling or late-night thoughts."),
-  );
+  ];
+  // The owner asked for all perfumed candles in one listing, with the scent as the option (Oct 2026).
+  products.push({
+    slug: "perfumed-candle", name: "Perfumed Candle", cat: "scented-candles", featured: true, best: true,
+    images: candles.map((c) => c.images[0]),
+    variants: candles.map((c) => ({ ...c.variants[0], name: `${c.name} · 300 g`, prev: { name: "300 g" } })),
+    shippingInfo: candles[0].shippingInfo,
+    description: ["Our 300 g perfumed candles, hand-poured in Manila with a wooden wick. Each scent tells its own story."]
+      .concat(candles.map((c) => `${c.name} (${c.family}): ${[c.top, c.heart, c.base].join(", ")}.`)).join("\n\n"),
+  });
   // The generic "Luxe Scented Soy Candle" (300 g) is replaced by the named Perfumed Candles above.
   await db.product.updateMany({ where: { slug: "luxe-scented-soy-candle", images: { every: { url: { startsWith: "/placeholders/" } } } }, data: { status: "ARCHIVED" } });
 
@@ -158,6 +167,16 @@ async function main() {
       }
     }
     if (p.retire) await db.productVariant.updateMany({ where: { sku: { in: p.retire }, productId: product.id }, data: { isActive: false } });
+  }
+
+  // Move each per-scent candle's variant (with its stock) into the merged listing, then archive the old page.
+  const merged = await db.product.findUniqueOrThrow({ where: { slug: "perfumed-candle" } });
+  for (const [i, c] of candles.entries()) {
+    const old = await db.product.findUnique({ where: { slug: c.slug } });
+    if (!old) continue;
+    const moved = await db.productVariant.updateMany({ where: { sku: c.variants[0].sku, productId: old.id }, data: { productId: merged.id, sortOrder: i } });
+    await db.productVariant.updateMany({ where: { sku: c.variants[0].sku, name: "300 g" }, data: { name: `${c.name} · 300 g` } });
+    if (moved.count) await db.product.update({ where: { id: old.id }, data: { status: "ARCHIVED" } });
   }
 
   if ((await db.shippingRule.count()) === 0) {

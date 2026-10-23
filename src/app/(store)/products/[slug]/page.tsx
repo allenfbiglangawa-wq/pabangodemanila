@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { getCards } from "@/lib/catalog";
@@ -43,7 +43,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 }
 
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
-  const p = await load((await params).slug);
+  const { slug } = await params;
+  const p = await load(slug);
+  // The per-scent candle pages were merged into one listing; keep old shared links working.
+  if (!p && slug.endsWith("-perfumed-candle")) permanentRedirect("/products/perfumed-candle");
   if (!p) notFound();
   const [user, policies] = await Promise.all([getCurrentUser(), getSetting("policies")]);
   const wished = user ? Boolean(await db.wishlistItem.findUnique({ where: { userId_productId: { userId: user.id, productId: p.id } } })) : false;

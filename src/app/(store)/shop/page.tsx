@@ -25,8 +25,9 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
   if (sp.flag === "new") and.push({ isNewArrival: true });
   if (and.length) where.AND = and;
 
-  const orderBy: Prisma.ProductOrderByWithRelationInput =
-    sp.sort === "name" ? { name: "asc" } : sp.sort === "new" ? { createdAt: "desc" } : { isFeatured: "desc" };
+  // The default view groups products by category (candles together, then sprays, and so on).
+  const orderBy: Prisma.ProductOrderByWithRelationInput[] =
+    sp.sort === "name" ? [{ name: "asc" }] : sp.sort === "new" ? [{ createdAt: "desc" }] : [{ category: { sortOrder: "asc" } }, { isFeatured: "desc" }, { name: "asc" }];
 
   const [categories, familiesRaw, user] = await Promise.all([
     db.category.findMany({ where: { isActive: true }, orderBy: { sortOrder: "asc" } }),

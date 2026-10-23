@@ -70,7 +70,7 @@ export async function toCards(products: CardProduct[]): Promise<ProductCardData[
   });
 }
 
-export async function getCards(where: Prisma.ProductWhereInput, orderBy: Prisma.ProductOrderByWithRelationInput = { createdAt: "desc" }, take?: number) {
+export async function getCards(where: Prisma.ProductWhereInput, orderBy: Prisma.ProductOrderByWithRelationInput | Prisma.ProductOrderByWithRelationInput[] = { createdAt: "desc" }, take?: number) {
   const products = await db.product.findMany({ where: { status: "ACTIVE", ...where }, include: cardInclude, orderBy, take });
   return toCards(products);
 }
