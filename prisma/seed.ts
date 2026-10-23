@@ -53,14 +53,17 @@ async function main() {
 
   // Stock counts are not in the plan: products start at 0 unless SEED_DEMO_STOCK=1 (demo only).
   const demoStock = process.env.SEED_DEMO_STOCK === "1" ? 20 : 0;
-  type V = { sku: string; name: string; price: number };
+  // `prev` is what an earlier seed wrote; an existing variant still carrying it is updated, admin edits are kept.
+  type V = { sku: string; name: string; price: number; prev?: { name?: string; price?: number } };
   type P = {
     slug: string; name: string; cat: string; images: { url: string; alt: string }[]; featured?: boolean; best?: boolean;
     description: string; variants: V[]; retire?: string[];
     family?: string; top?: string; heart?: string; base?: string; shippingInfo?: string;
   };
   const spray = (code: string, scent: string): V => ({ sku: `PDM-SPRY85-${code}`, name: `${scent} · 85 ml`, price: 24800 });
-  const oil = (code: string, scent: string): V => ({ sku: `PDM-OIL30-${code}`, name: `${scent} · 30 ml`, price: 28800 });
+  // Scent lists and prices for sprays, oils and reed diffusers follow the owner's Shopee listings (Oct 2026).
+  const oil = (code: string, scent: string, prevScent = scent): V => ({ sku: `PDM-OIL30-${code}`, name: `${scent} · 30 ml`, price: 22400, prev: { name: `${prevScent} · 30 ml`, price: 28800 } });
+  const reed = (code: string, scent: string): V => ({ sku: `PDM-REED-${code}`, name: scent, price: 35800 });
   const products: P[] = [
     { slug: "scented-soy-candle", name: "Scented Soy Candle", cat: "scented-candles", featured: true, best: true,
       images: [{ url: "/placeholders/candle.svg", alt: "Scented Soy Candle (placeholder image)" }],
@@ -68,19 +71,23 @@ async function main() {
       description: "Our classic candle, hand-poured in small batches with a soy wax blend, Philippine coconut oil and phthalate-free fragrance oils, then cured for 3–7 days for a cleaner burn and a fuller scent throw." },
     { slug: "perfumed-room-and-linen-spray", name: "Perfumed Room & Linen Spray", cat: "room-linen-sprays", featured: true, best: true,
       images: [{ url: "/brand/room-linen-sprays.jpg", alt: "Pabango de Manila perfumed room and linen sprays in six scents" }],
-      variants: [spray("LAV", "Provence Lavender"), spray("LEM", "Capri Lemon"), spray("TEA", "Imperial Tea"), spray("RIV", "French Riviera"), spray("MNT", "Mint Blanc"), spray("STR", "Starry Night")],
+      variants: [spray("LAV", "Provence Lavender"), spray("LEM", "Capri Lemon"), spray("TEA", "Imperial Tea"), spray("RIV", "French Riviera"), spray("MNT", "Mint Blanc"), spray("STR", "Starry Night"),
+        spray("ZEN", "Zen Garden"), spray("OAS", "Oasis"), spray("LDN", "London Bloom"), spray("PEP", "Peppermint")],
       retire: ["PDM-SPRY-85"],
-      description: "A phthalate-free perfumed mist for rooms, linens and fabrics, formulated for long-lasting freshness. 85 ml, in six signature scents." },
+      description: "A phthalate-free perfumed mist for rooms, linens and fabrics, formulated for long-lasting freshness. 85 ml, in ten signature scents." },
     { slug: "reed-diffuser", name: "Reed Diffuser", cat: "reed-diffusers", featured: true,
       images: [{ url: "/brand/oasis-reed-diffuser.jpg", alt: "Pabango de Manila Oasis Reed Diffuser in an amber glass bottle" }],
-      variants: [{ sku: "PDM-DIFF-100", name: "100 ml", price: 44800 }],
+      variants: [reed("LAV", "Provence Lavender"), reed("TEA", "Imperial Tea"), reed("ZEN", "Zen Forest - Bamboo"), reed("OAS", "Oasis - Shangrila"), reed("LEM", "Capri Lemon"),
+        reed("STR", "Starry Night"), reed("LDN", "London Bloom"), reed("BUD", "The Grand Budapest"), reed("CAF", "Cafe de Manila"), reed("ORG", "Tuscan Orange Blossom")],
+      retire: ["PDM-DIFF-100"],
       description: "Flameless home fragrance crafted for steady, even scent diffusion, tested in our studio for consistent throw." },
     { slug: "aroma-diffuser-oil", name: "Aroma Diffuser Oil", cat: "humidifier-oils", featured: true,
       images: [
         { url: "/brand/aroma-diffuser-oils.jpg", alt: "Pabango de Manila aroma diffuser oils in dropper bottles" },
         { url: "/brand/diffuser-oil-dropper.jpg", alt: "Aroma diffuser oil being added to a diffuser" },
       ],
-      variants: [oil("TEA", "Imperial Tea"), oil("ZEN", "Zen Forest"), oil("PEP", "Peppermint Blanc"), oil("HIN", "Hinoki Wood")],
+      variants: [oil("ZEN", "Zen Forest - Bamboo", "Zen Forest"), oil("TEA", "Imperial Tea"), oil("OAS", "Oasis - Shangrila"), oil("LDN", "London Bloom"),
+        oil("HIN", "Hinoki Wood"), oil("PEP", "Peppermint", "Peppermint Blanc"), oil("GRN", "Green Tea")],
       description: "Fragrance oil for humidifiers and electric aroma diffusers, blended in-house for a clean, consistent scent. 30 ml dropper bottle." },
   ];
   // Perfumed Candle collection, from the owner's Instagram captions. Each is a 300 g wood-wick candle;
@@ -134,8 +141,17 @@ async function main() {
       await db.productImage.createMany({ data: p.images.map((img, i) => ({ ...img, productId: product!.id, sortOrder: i })) });
       if (product.description === p.description.replace(/ (85|30) ml.*$/, "")) await db.product.update({ where: { id: product.id }, data: { description: p.description } });
     }
-    for (const [i, v] of p.variants.entries()) {
-      if (await db.productVariant.findUnique({ where: { sku: v.sku } })) continue;
+    if (p.description.includes("ten signature") && product.description === p.description.replace("ten signature", "six signature")) await db.product.update({ where: { id: product.id }, data: { description: p.description } });
+    for (const [i, { prev, ...v }] of p.variants.entries()) {
+      const existing = await db.productVariant.findUnique({ where: { sku: v.sku } });
+      if (existing) {
+        const data = {
+          ...(prev?.name && existing.name === prev.name && { name: v.name }),
+          ...(prev?.price && existing.price === prev.price && { price: v.price }),
+        };
+        if (Object.keys(data).length) await db.productVariant.update({ where: { id: existing.id }, data });
+        continue;
+      }
       const created = await db.productVariant.create({ data: { ...v, productId: product.id, stockOnHand: demoStock, lowStockThreshold: 5, sortOrder: i } });
       if (demoStock) {
         await db.inventoryMovement.create({ data: { variantId: created.id, type: "ADJUSTMENT", quantityChange: demoStock, previousOnHand: 0, newOnHand: demoStock, previousReserved: 0, newReserved: 0, reason: "DEMO stock from seed — replace with a real count" } });
