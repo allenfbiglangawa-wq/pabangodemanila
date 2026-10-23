@@ -9,6 +9,8 @@
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
   "observability": { "enabled": true },
+  // Keep variables added in the dashboard when a GitHub push redeploys.
+  "keep_vars": true,
   "vars": {
     "PRISMA_ADAPTER": "pg",
     "UPLOAD_STORAGE": "database",
