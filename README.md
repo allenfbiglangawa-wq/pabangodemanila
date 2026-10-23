@@ -18,7 +18,7 @@ npm run dev                   # http://localhost:3000
 
 Admin: http://localhost:3000/admin, signing in with `SEED_ADMIN_EMAIL` /
 `SEED_ADMIN_PASSWORD` from `.env`. **Change that password straight away**
-(Admin › Settings).
+(your profile at `/account/profile`, linked from Admin › Settings).
 
 | Script | What it does |
 |---|---|

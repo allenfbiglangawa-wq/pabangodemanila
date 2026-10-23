@@ -63,6 +63,7 @@ export default async function SettingsAdmin({ searchParams }: { searchParams: Pr
 
       <section className="admin-card max-w-3xl">
         <h2 className="mb-3 text-[13px] font-medium">Team access</h2>
+        <p className="mb-4 text-[13px] text-muted">To change your own password, open <a href="/account/profile" className="underline">your profile</a>.</p>
         <ul className="mb-4 space-y-1 text-[13px]">{staff.map((s) => <li key={s.id}>{s.email} · {s.role === "ADMIN" ? "Owner (full access)" : "Staff (no refunds, promotions or settings)"}{s.id === admin.id && " · you"}</li>)}</ul>
         <form action={saveStaff} className="grid gap-3 sm:grid-cols-2">
           <Field label="Email" name="email" type="email" required />
