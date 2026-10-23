@@ -74,7 +74,10 @@ export async function SiteFooter() {
         </div>
       </div>
       <div className="border-t border-line">
-        <p className="container-luxe py-6 text-[12px] text-muted">© {new Date().getFullYear()} Pabango de Manila. All rights reserved.</p>
+        <div className="container-luxe flex items-center justify-between gap-4 py-6 text-[12px] text-muted">
+          <p>© {new Date().getFullYear()} Pabango de Manila. All rights reserved.</p>
+          <Link href="/admin/login" className="hover:text-charcoal">Admin sign in</Link>
+        </div>
       </div>
     </footer>
   );

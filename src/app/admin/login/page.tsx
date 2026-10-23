@@ -1,9 +1,13 @@
 import { loginAction } from "@/app/actions/account";
+import { redirect } from "next/navigation";
 import { ActionForm } from "@/components/ActionForm";
+import { getCurrentUser, isStaff } from "@/lib/auth";
 
 export const metadata = { title: "Admin Sign In", robots: { index: false } };
 
-export default function AdminLogin() {
+export default async function AdminLogin() {
+  const user = await getCurrentUser();
+  if (isStaff(user?.role)) redirect("/admin");
   return (
     <div className="flex min-h-screen items-center justify-center bg-ivory px-5">
       <div className="w-full max-w-sm bg-pearl p-10">
