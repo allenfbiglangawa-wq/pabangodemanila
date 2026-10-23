@@ -17,13 +17,16 @@ import path from "node:path";
 const db = createClient();
 
 async function main() {
-  const email = (process.env.SEED_ADMIN_EMAIL ?? "owner@example.com").toLowerCase();
-  const password = process.env.SEED_ADMIN_PASSWORD ?? "ChangeMe!2026";
+  const email = (process.env.SEED_ADMIN_EMAIL ?? "owner@example.com").trim().toLowerCase();
+  const password = (process.env.SEED_ADMIN_PASSWORD ?? "ChangeMe!2026").trim();
   if ((process.env.VERCEL || process.env.BUILD_TARGET === "cloudflare") && (!process.env.SEED_ADMIN_EMAIL || !process.env.SEED_ADMIN_PASSWORD || password.length < 10))
     throw new Error("Set SEED_ADMIN_EMAIL and a SEED_ADMIN_PASSWORD of at least 10 characters before deploying.");
+  // SEED_ADMIN_RESET=1 sets this account's password (and owner role) to the
+  // values above, for an owner who cannot sign in. Remove it afterwards.
+  const reset = process.env.SEED_ADMIN_RESET === "1";
   await db.user.upsert({
     where: { email },
-    update: {},
+    update: reset ? { passwordHash: await bcrypt.hash(password, 12), role: "ADMIN" } : {},
     create: { email, name: "Store Owner", role: "ADMIN", passwordHash: await bcrypt.hash(password, 12) },
   });
 
@@ -207,7 +210,7 @@ async function main() {
     }
   }
 
-  console.log(`Seed complete. Admin: ${email}`);
+  console.log(`Seed complete. Admin: ${email}${reset ? " (password reset)" : ""}`);
 }
 
 main()
