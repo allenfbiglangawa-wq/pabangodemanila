@@ -351,13 +351,13 @@ export default async function HomePage() {
       </section>
 
       {/* Newsletter */}
-      <section className="-mb-32 bg-charcoal text-pearl">
+      <section className="-mb-32 bg-ivory text-charcoal">
         <div className="container-luxe grid gap-10 py-20 lg:grid-cols-2 lg:items-center lg:py-28">
           <div>
             <h2 className="display text-5xl">{newsletter.heading}</h2>
-            <p className="mt-5 max-w-md text-[15px] leading-relaxed text-pearl/70">{newsletter.body}</p>
+            <p className="mt-5 max-w-md text-[15px] leading-relaxed text-charcoal/75">{newsletter.body}</p>
           </div>
-          <NewsletterForm consentText={newsletter.consentText} source="homepage" dark />
+          <NewsletterForm consentText={newsletter.consentText} source="homepage" />
         </div>
       </section>
     </>

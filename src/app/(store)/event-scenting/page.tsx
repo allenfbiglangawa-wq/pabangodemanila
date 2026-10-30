@@ -105,14 +105,14 @@ export default async function EventScentingPage() {
       )}
 
       {s.whyUs.length > 0 && (
-        <section className="bg-charcoal py-24 text-pearl lg:py-32">
+        <section className="bg-ivory py-24 text-charcoal lg:py-32">
           <div className="container-luxe">
             <h2 className="display text-center text-5xl">Why Pabango de Manila</h2>
             <div className="mt-16 grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
               {s.whyUs.map(split).map(([title, text], i) => (
-                <div key={i} className="border-t border-pearl/20 pt-6">
-                  <p className="font-serif text-2xl">{title}</p>
-                  {text && <p className="mt-3 text-[14px] leading-relaxed text-pearl/75">{text}</p>}
+                <div key={i} className="border-t border-maroon/25 pt-6">
+                  <p className="font-serif text-2xl text-maroon">{title}</p>
+                  {text && <p className="mt-3 text-[14px] leading-relaxed text-charcoal/75">{text}</p>}
                 </div>
               ))}
             </div>
