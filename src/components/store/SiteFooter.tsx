@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { getSetting } from "@/lib/settings";
 import { NewsletterForm } from "./NewsletterForm";
+import { SocialLinks } from "./SocialLinks";
 
 export async function SiteFooter() {
   const [contact, newsletter] = await Promise.all([getSetting("contact"), getSetting("newsletter")]);
@@ -51,11 +52,7 @@ export async function SiteFooter() {
               {contact.phone && <a href={`tel:${contact.phone.replace(/\s/g, "")}`} className="block hover:text-champagne-deep">{contact.phone}</a>}
             </p>
           )}
-          <div className="mt-6 flex gap-5 text-[12px] uppercase tracking-[0.2em]">
-            {contact.instagramUrl && <a href={contact.instagramUrl} target="_blank" rel="noopener noreferrer" className="hover:text-champagne-deep">Instagram</a>}
-            {contact.facebookUrl && <a href={contact.facebookUrl} target="_blank" rel="noopener noreferrer" className="hover:text-champagne-deep">Facebook</a>}
-            {contact.messengerUrl && <a href={contact.messengerUrl} target="_blank" rel="noopener noreferrer" className="hover:text-champagne-deep">Messenger</a>}
-          </div>
+          <SocialLinks size="sm" className="mt-6 gap-3" />
         </div>
         {cols.map((c) => (
           <div key={c.title} className="lg:col-span-2">

@@ -13,6 +13,7 @@ import { ProductCard } from "@/components/store/ProductCard";
 import { SectionHeading } from "@/components/store/SectionHeading";
 import { NewsletterForm } from "@/components/store/NewsletterForm";
 import { Stars } from "@/components/store/Stars";
+import { SocialLinks } from "@/components/store/SocialLinks";
 
 export const dynamic = "force-dynamic";
 
@@ -21,13 +22,12 @@ export const dynamic = "force-dynamic";
 const FEATURED_SLUGS = ["tuscan-orange-blossom-perfumed-candle", "oasis-perfumed-candle"];
 
 export default async function HomePage() {
-  const [story, eventSettings, instagram, newsletter, user, stockists, business, externalReviews, spotlight, moments] = await Promise.all([
+  const [story, eventSettings, instagram, newsletter, user, business, externalReviews, spotlight, moments] = await Promise.all([
     getSetting("story"),
     getSetting("eventScenting"),
     getSetting("instagram"),
     getSetting("newsletter"),
     getCurrentUser(),
-    getSetting("stockists"),
     getSetting("business"),
     getSetting("externalReviews"),
     getSetting("spotlight"),
@@ -314,24 +314,14 @@ export default async function HomePage() {
         </ul>
       </section>
 
-      {/* Stockists */}
-      {stockists.locations.length > 0 && (
-        <section className="border-y border-line bg-pearl py-16">
-          <div className="container-luxe text-center">
-            <p className="eyebrow mb-4">{stockists.heading}</p>
-            <p className="mx-auto max-w-xl text-[15px] text-muted">{stockists.body}</p>
-            <ul className="mt-8 flex flex-wrap justify-center gap-x-10 gap-y-3 font-serif text-2xl">
-              {stockists.locations.map((l) => <li key={l}>{l}</li>)}
-            </ul>
-            {(stockists.shopeeUrl || stockists.tiktokUrl) && (
-              <div className="mt-8 flex justify-center gap-8">
-                {stockists.shopeeUrl && <a href={stockists.shopeeUrl} target="_blank" rel="noopener noreferrer" className="btn-link">Also on Shopee</a>}
-                {stockists.tiktokUrl && <a href={stockists.tiktokUrl} target="_blank" rel="noopener noreferrer" className="btn-link">TikTok Shop</a>}
-              </div>
-            )}
-          </div>
-        </section>
-      )}
+      {/* Where to find us online (the owner replaced the store list with these, 30 Oct 2026) */}
+      <section className="border-y border-maroon/10 bg-pearl py-16">
+        <div className="container-luxe text-center">
+          <p className="eyebrow mb-4">Find Us Online</p>
+          <p className="mx-auto max-w-xl text-[15px] text-muted">Follow us and shop Pabango de Manila on your favourite apps.</p>
+          <SocialLinks className="mt-8 justify-center gap-8 sm:gap-12" />
+        </div>
+      </section>
 
       {/* Instagram */}
       <section className="container-luxe py-24 lg:py-32">
