@@ -33,18 +33,22 @@ async function main() {
   // Categories and retail products from the owner's business plan (Table 12 price list),
   // with scent names and photos supplied by the owner.
   const categories = [
-    { slug: "scented-candles", name: "Scented Candles", imageUrl: "/brand/candles/london-bloom.jpg", sortOrder: 1, description: "Hand-poured soy candles, cured for 3–7 days for a cleaner burn and fuller scent throw." },
-    { slug: "room-linen-sprays", name: "Room & Linen Sprays", imageUrl: "/brand/room-linen-sprays.jpg", sortOrder: 2, description: "Phthalate-free perfumed sprays for rooms and linens." },
-    { slug: "reed-diffusers", name: "Reed Diffusers", imageUrl: "/brand/oasis-reed-diffuser.jpg", sortOrder: 3, description: "Steady, flameless scent diffusion for any room." },
-    { slug: "humidifier-oils", name: "Aroma Diffuser Oils", imageUrl: "/brand/aroma-diffuser-oils.jpg", sortOrder: 4, description: "Fragrance oils made for humidifiers and electric aroma diffusers." },
+    { slug: "scented-candles", name: "Scented Candles", imageUrl: "/brand/v2/candle-tuscan-orange-blossom-portrait.jpg", sortOrder: 1, description: "Hand-poured soy candles, cured for 3–7 days for a cleaner burn and fuller scent throw." },
+    { slug: "room-linen-sprays", name: "Room & Linen Sprays", imageUrl: "/brand/v2/spray-lavender.jpg", sortOrder: 2, description: "Phthalate-free perfumed sprays for rooms and linens." },
+    { slug: "reed-diffusers", name: "Reed Diffusers", imageUrl: "/brand/v2/reed-oasis.jpg", sortOrder: 3, description: "Steady, flameless scent diffusion for any room." },
+    { slug: "humidifier-oils", name: "Aroma Diffuser Oils", imageUrl: "/brand/v2/oil-zen-forest.jpg", sortOrder: 4, description: "Fragrance oils made for humidifiers and electric aroma diffusers." },
     { slug: "gift-sets", name: "Gift Sets", imageUrl: "/placeholders/giftbox.svg", sortOrder: 5, description: "Gift sets in handmade paper maché boxes from Pakil, Laguna." },
   ];
+  const PREVIOUS_CATEGORY_IMAGES = ["/brand/candles/london-bloom.jpg", "/brand/v2/candle-tuscan-orange-blossom.jpg", "/brand/room-linen-sprays.jpg", "/brand/oasis-reed-diffuser.jpg", "/brand/aroma-diffuser-oils.jpg"];
   for (const c of categories) {
     const existing = await db.category.findUnique({ where: { slug: c.slug } });
     if (!existing) await db.category.create({ data: c });
     // Swap in real photos (and the new name) only where the owner has not changed them.
     else if (existing.imageUrl?.startsWith("/placeholders/") && !c.imageUrl.startsWith("/placeholders/"))
       await db.category.update({ where: { id: existing.id }, data: { imageUrl: c.imageUrl, name: existing.name === "Humidifier Oils" ? c.name : existing.name, description: c.description } });
+    // 2026 redesign: the client's new category photos replace the earlier seeded ones (not owner uploads).
+    else if (existing.imageUrl && PREVIOUS_CATEGORY_IMAGES.includes(existing.imageUrl) && existing.imageUrl !== c.imageUrl)
+      await db.category.update({ where: { id: existing.id }, data: { imageUrl: c.imageUrl } });
   }
   // Retire categories and sample products from earlier seeds.
   await db.category.updateMany({ where: { slug: { in: ["fine-fragrances", "home-diffusers", "gift-collections"] } }, data: { isActive: false } });
@@ -120,15 +124,8 @@ async function main() {
     candle("CDM", "cafe-de-manila-perfumed-candle", "Café de Manila", "Gourmand", "Coffee Bean", "Almond", "Vanilla Bean",
       "Always a favourite, formerly called French Vanilla and now lovingly renamed Café de Manila. It captures the cozy moment of grinding beans in the morning, the first pour of espresso, and the sweet comfort of vanilla in the air.\n\nWarm, familiar and grounded, just like your favourite neighbourhood café. Perfect for slow mornings, journaling or late-night thoughts."),
   ];
-  // The owner asked for all perfumed candles in one listing, with the scent as the option (Oct 2026).
-  products.push({
-    slug: "perfumed-candle", name: "Perfumed Candle", cat: "scented-candles", featured: true, best: true,
-    images: candles.map((c) => c.images[0]),
-    variants: candles.map((c) => ({ ...c.variants[0], name: `${c.name} · 300 g`, prev: { name: "300 g" } })),
-    shippingInfo: candles[0].shippingInfo,
-    description: ["Our 300 g perfumed candles, hand-poured in Manila with a wooden wick. Each scent tells its own story."]
-      .concat(candles.map((c) => `${c.name} (${c.family}): ${[c.top, c.heart, c.base].join(", ")}.`)).join("\n\n"),
-  });
+  // Each scent is its own listing again, as in the client's 2026 website design (owner chose this on 30 Oct 2026).
+  products.push(...candles);
   // The generic "Luxe Scented Soy Candle" (300 g) is replaced by the named Perfumed Candles above.
   await db.product.updateMany({ where: { slug: "luxe-scented-soy-candle", images: { every: { url: { startsWith: "/placeholders/" } } } }, data: { status: "ARCHIVED" } });
 
@@ -172,14 +169,29 @@ async function main() {
     if (p.retire) await db.productVariant.updateMany({ where: { sku: { in: p.retire }, productId: product.id }, data: { isActive: false } });
   }
 
-  // Move each per-scent candle's variant (with its stock) into the merged listing, then archive the old page.
-  const merged = await db.product.findUniqueOrThrow({ where: { slug: "perfumed-candle" } });
-  for (const [i, c] of candles.entries()) {
-    const old = await db.product.findUnique({ where: { slug: c.slug } });
-    if (!old) continue;
-    const moved = await db.productVariant.updateMany({ where: { sku: c.variants[0].sku, productId: old.id }, data: { productId: merged.id, sortOrder: i } });
-    await db.productVariant.updateMany({ where: { sku: c.variants[0].sku, name: "300 g" }, data: { name: `${c.name} · 300 g` } });
-    if (moved.count) await db.product.update({ where: { id: old.id }, data: { status: "ARCHIVED" } });
+  // Undo the 23 Oct merge: move each scent's variant (with its stock) back to its own page, then retire the merged listing.
+  const merged = await db.product.findUnique({ where: { slug: "perfumed-candle" } });
+  if (merged) {
+    for (const c of candles) {
+      const own = await db.product.findUnique({ where: { slug: c.slug } });
+      if (!own) continue;
+      const moved = await db.productVariant.updateMany({ where: { sku: c.variants[0].sku, productId: merged.id }, data: { productId: own.id, sortOrder: 0 } });
+      await db.productVariant.updateMany({ where: { sku: c.variants[0].sku, name: `${c.name} · 300 g` }, data: { name: "300 g" } });
+      if (moved.count) await db.product.update({ where: { id: own.id }, data: { status: "ACTIVE" } });
+    }
+    if (!(await db.productVariant.count({ where: { productId: merged.id } }))) await db.product.update({ where: { id: merged.id }, data: { status: "ARCHIVED" } });
+  }
+
+  // Photos from the client's 2026 website design go first on their products (added once, never duplicated).
+  const designPhotos: [string, string, string][] = [
+    ["tuscan-orange-blossom-perfumed-candle", "/brand/v2/candle-tuscan-orange-blossom-portrait.jpg", "Tuscan Orange Blossom perfumed candle with fresh oranges"],
+    ["reed-diffuser", "/brand/v2/reed-oasis.jpg", "Oasis reed diffuser in an amber glass bottle"],
+    ["aroma-diffuser-oil", "/brand/v2/oil-zen-forest.jpg", "Zen Forest aroma diffuser oil dropper bottle"],
+  ];
+  for (const [slug, url, alt] of designPhotos) {
+    const product = await db.product.findUnique({ where: { slug }, include: { images: true } });
+    if (!product || product.images.some((img) => img.url === url)) continue;
+    await db.productImage.create({ data: { productId: product.id, url, alt, sortOrder: Math.min(0, ...product.images.map((img) => img.sortOrder)) - 1 } });
   }
 
   if ((await db.shippingRule.count()) === 0) {

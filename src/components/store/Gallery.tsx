@@ -27,7 +27,7 @@ export function Gallery({ images, name, videoUrl }: { images: { url: string; alt
           </div>
         </div>
       )}
-      <div className={`relative aspect-[4/5] flex-1 ${list.length > 1 || videoUrl ? "" : "lg:col-span-2"} overflow-hidden bg-ivory`}>
+      <div className={`relative aspect-[4/5] flex-1 ${list.length > 1 || videoUrl ? "" : "lg:col-span-2"} overflow-hidden rounded-3xl bg-ivory shadow-xl`}>
         {showVideo ? (
           <video src={videoUrl!} controls playsInline className="h-full w-full object-contain" />
         ) : (

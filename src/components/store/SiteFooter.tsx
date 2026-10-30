@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { getSetting } from "@/lib/settings";
 import { NewsletterForm } from "./NewsletterForm";
@@ -38,10 +39,10 @@ export async function SiteFooter() {
     },
   ];
   return (
-    <footer className="mt-32 border-t border-line bg-ivory">
+    <footer className="mt-32 bg-pearl">
       <div className="container-luxe grid gap-14 py-20 sm:grid-cols-2 lg:grid-cols-12 lg:gap-10">
         <div className="lg:col-span-3">
-          <p className="font-serif text-2xl tracking-[0.3em]">PABANGO DE MANILA</p>
+          <Image src="/brand/v2/logo-lockup-maroon.png" alt="Pabango de Manila, A Filipino Fragrance House" width={726} height={864} className="h-28 w-auto" />
           {contact.tagline && <p className="mt-2 text-[11px] uppercase tracking-[0.3em] text-champagne-deep">{contact.tagline}</p>}
           <p className="mt-5 max-w-sm text-[14px] leading-relaxed text-muted">{contact.footerAbout}</p>
           {(contact.email || contact.phone) && (

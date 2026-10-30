@@ -16,6 +16,12 @@ export const NAV = [
   { href: "/press", label: "Press & Events" },
   { href: "/contact", label: "Contact" },
 ];
+// The client's design keeps the desktop bar to three links; the rest live in the footer and mobile menu.
+const PRIMARY = [
+  { href: "/shop", label: "Shop" },
+  { href: "/our-story", label: "About" },
+  { href: "/contact", label: "Contact" },
+];
 
 export function HeaderClient({ cartCount, wishlistCount }: { cartCount: number; wishlistCount: number }) {
   const [compact, setCompact] = useState(false);
@@ -38,27 +44,26 @@ export function HeaderClient({ cartCount, wishlistCount }: { cartCount: number; 
   }, [open]);
 
   return (
-    <header className={`sticky top-0 z-40 border-b bg-pearl/95 backdrop-blur transition-all duration-500 ${compact ? "border-line" : "border-transparent"}`}>
-      <div className={`container-luxe flex items-center justify-between gap-3 sm:gap-6 transition-all duration-500 ${compact ? "h-16" : "h-20 lg:h-24"}`}>
+    <header className={`sticky top-0 z-40 bg-maroon text-pearl transition-all duration-500 ${compact ? "shadow-md" : ""}`}>
+      <div className={`container-luxe flex items-center justify-between gap-3 sm:gap-6 transition-all duration-500 ${compact ? "h-14" : "h-16 lg:h-20"}`}>
         <div className="flex shrink-0 items-center gap-1 sm:gap-3">
-          <button className="-ml-2 p-2 xl:hidden" onClick={() => setOpen(true)} aria-label="Open menu" aria-expanded={open}>
+          <button className="-ml-2 p-2 lg:hidden" onClick={() => setOpen(true)} aria-label="Open menu" aria-expanded={open}>
             <MenuIcon />
           </button>
-          <Link href="/" className="flex items-center gap-3 font-serif text-[22px] tracking-[0.32em] whitespace-nowrap min-[1720px]:text-[19px] min-[1720px]:tracking-[0.28em]" aria-label="Pabango de Manila — home">
-            <Image src="/brand/pdm-logo-mark.png" alt="PDM" width={970} height={360} priority className={`w-auto transition-all duration-500 ${compact ? "h-7" : "h-8 lg:h-10"}`} />
-            <span className="hidden sm:inline xl:hidden min-[1720px]:inline">PABANGO <span className="text-champagne-deep">DE</span> MANILA</span>
+          <Link href="/" className="flex items-center" aria-label="Pabango de Manila, home">
+            <Image src="/brand/v2/logo-wordmark-white.png" alt="Pabango de Manila, A Filipino Fragrance House" width={726} height={309} priority className={`w-auto transition-all duration-500 ${compact ? "h-9" : "h-10 lg:h-12"}`} />
           </Link>
         </div>
 
-        <nav className="hidden min-w-0 flex-1 justify-center px-4 xl:flex" aria-label="Main">
-          <ul className="flex items-center gap-4 2xl:gap-7">
-            {NAV.filter((n) => n.href !== "/").map((n) => {
+        <nav className="hidden min-w-0 flex-1 justify-end px-4 lg:flex" aria-label="Main">
+          <ul className="flex items-center gap-8">
+            {PRIMARY.map((n) => {
               const active = n.href === "/" ? pathname === "/" : pathname.startsWith(n.href);
               return (
                 <li key={n.href}>
                   <Link
                     href={n.href}
-                    className={`whitespace-nowrap text-[11px] uppercase tracking-[0.16em] 2xl:tracking-[0.2em] transition-colors hover:text-champagne-deep ${active ? "text-champagne-deep" : ""}`}
+                    className={`whitespace-nowrap text-[15px] transition-opacity hover:opacity-75 ${active ? "underline underline-offset-8" : ""}`}
                   >
                     {n.label}
                   </Link>
@@ -87,7 +92,7 @@ export function HeaderClient({ cartCount, wishlistCount }: { cartCount: number; 
       </div>
 
       {searchOpen && (
-        <div className="border-t border-line bg-pearl">
+        <div className="border-t border-pearl/20 bg-pearl text-charcoal">
           <form action="/shop" className="container-luxe flex items-center gap-4 py-5">
             <SearchIcon className="h-5 w-5 text-muted" />
             <label htmlFor="site-search" className="sr-only">Search products</label>
@@ -98,9 +103,9 @@ export function HeaderClient({ cartCount, wishlistCount }: { cartCount: number; 
       )}
 
       {open && (
-        <div className="fixed inset-0 z-50 bg-pearl xl:hidden" role="dialog" aria-modal="true" aria-label="Menu">
+        <div className="fixed inset-0 z-50 bg-maroon text-pearl lg:hidden" role="dialog" aria-modal="true" aria-label="Menu">
           <div className="container-luxe flex h-20 items-center justify-between">
-            <span className="font-serif text-[19px] tracking-[0.32em]">PABANGO DE MANILA</span>
+            <Image src="/brand/v2/logo-wordmark-white.png" alt="Pabango de Manila" width={726} height={309} className="h-10 w-auto" />
             <button className="-mr-2 p-2" onClick={() => setOpen(false)} aria-label="Close menu">
               <CloseIcon />
             </button>
@@ -115,7 +120,7 @@ export function HeaderClient({ cartCount, wishlistCount }: { cartCount: number; 
                 </li>
               ))}
             </ul>
-            <div className="mt-12 flex gap-6 border-t border-line pt-6 text-[12px] uppercase tracking-[0.2em]">
+            <div className="mt-12 flex gap-6 border-t border-pearl/20 pt-6 text-[12px] uppercase tracking-[0.2em]">
               <Link href="/account">Account</Link>
               <Link href="/account/wishlist">Wishlist</Link>
               <Link href="/cart">Bag ({cartCount})</Link>
@@ -129,7 +134,7 @@ export function HeaderClient({ cartCount, wishlistCount }: { cartCount: number; 
 
 function Dot({ n }: { n: number }) {
   return (
-    <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-champagne px-1 text-[10px] font-medium text-pearl">
+    <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-pearl px-1 text-[10px] font-medium text-maroon">
       {n > 99 ? "99+" : n}
     </span>
   );

@@ -6,6 +6,7 @@ import { getCards } from "@/lib/catalog";
 import { getCurrentUser } from "@/lib/auth";
 import { pesosToCentavos } from "@/lib/money";
 import { ProductCard } from "@/components/store/ProductCard";
+import { Media } from "@/components/Media";
 
 export const metadata: Metadata = { title: "Shop", description: "Shop fragrances, candles, diffusers and gift collections." };
 export const dynamic = "force-dynamic";
@@ -47,6 +48,8 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
 
   const wished = new Set(user ? (await db.wishlistItem.findMany({ where: { userId: user.id }, select: { productId: true } })).map((w) => w.productId) : []);
   const activeCategory = categories.find((c) => c.slug === sp.category);
+  // With nothing chosen yet, the shop opens on the category tiles from the client's design.
+  const browsing = !q && !sp.category && !sp.family && !sp.flag && !sp.min && !sp.max && !sp.stock && !sp.sort && sp.view !== "all";
   const families = familiesRaw.map((f) => f.fragranceFamily!).sort();
 
   const link = (patch: SP) => {
@@ -60,24 +63,37 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
     <div className="container-luxe pt-14 lg:pt-20">
       <header className="text-center">
         <p className="eyebrow mb-4">{q ? "Search" : "The Collection"}</p>
-        <h1 className="display text-5xl lg:text-7xl">{q ? `“${q}”` : activeCategory?.name ?? "Shop All"}</h1>
+        <h1 className="display text-5xl lg:text-7xl">{q ? `“${q}”` : activeCategory?.name ?? (browsing ? "Shop" : "Shop All")}</h1>
         {activeCategory?.description && !activeCategory.description.startsWith("PLACEHOLDER") && (
           <p className="mx-auto mt-5 max-w-xl text-muted">{activeCategory.description}</p>
         )}
       </header>
 
-      <nav className="mt-12 flex flex-wrap justify-center gap-x-8 gap-y-3 border-y border-line py-5 text-[12px] uppercase tracking-[0.18em]" aria-label="Categories">
-        <Link href={link({ category: undefined })} className={!sp.category ? "text-champagne-deep" : "hover:text-champagne-deep"}>All</Link>
+      <nav className="mt-10 flex flex-wrap justify-center gap-x-8 gap-y-3 py-3 text-[13px]" aria-label="Categories">
+        <Link href={link({ category: undefined, view: "all" })} className={!sp.category && !browsing ? "text-champagne-deep underline underline-offset-4" : "hover:text-champagne-deep"}>All</Link>
         {categories.map((c) => (
-          <Link key={c.id} href={link({ category: c.slug })} className={sp.category === c.slug ? "text-champagne-deep" : "hover:text-champagne-deep"}>
+          <Link key={c.id} href={link({ category: c.slug, view: undefined })} className={sp.category === c.slug ? "text-champagne-deep underline underline-offset-4" : "hover:text-champagne-deep"}>
             {c.name}
           </Link>
         ))}
       </nav>
 
-      <div className="mt-10 grid gap-12 lg:grid-cols-[220px_1fr]">
-        <aside>
-          <form className="space-y-8 text-[14px]" aria-label="Filters">
+      {browsing ? (
+        <div className="mt-10 grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
+          {categories.filter((c) => c.imageUrl && !c.imageUrl.startsWith("/placeholders/")).map((c) => (
+            <Link key={c.id} href={link({ category: c.slug })} className="group card-hover block">
+              <div className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-ivory shadow-md">
+                <Media src={c.imageUrl} alt={c.name} sizes="(min-width:1024px) 25vw, 50vw" />
+              </div>
+              <h2 className="mt-5 text-center font-serif text-xl">{c.name}</h2>
+            </Link>
+          ))}
+        </div>
+      ) : (
+      <div className="mt-6">
+        <details className="mb-8 rounded-xl border border-charcoal/10 bg-pearl/60 p-4 open:pb-6">
+          <summary className="cursor-pointer text-[13px] font-medium">Filter &amp; sort</summary>
+          <form className="mt-6 grid gap-6 text-[14px] sm:grid-cols-2 lg:grid-cols-4" aria-label="Filters">
             {sp.category && <input type="hidden" name="category" value={sp.category} />}
             <div>
               <label className="label" htmlFor="q">Search</label>
@@ -126,7 +142,7 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
               <Link href="/shop" className="btn-outline !px-4">Clear</Link>
             </div>
           </form>
-        </aside>
+        </details>
 
         <section aria-live="polite">
           <p className="mb-8 text-[13px] text-muted">{cards.length} {cards.length === 1 ? "piece" : "pieces"}</p>
@@ -142,6 +158,7 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
           )}
         </section>
       </div>
+      )}
     </div>
   );
 }

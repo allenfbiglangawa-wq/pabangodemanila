@@ -11,8 +11,8 @@ export function AnnouncementBar({ messages }: { messages: string[] }) {
   }, [messages.length]);
   if (!messages.length) return null;
   return (
-    <div className="bg-charcoal text-pearl">
-      <p key={i} className="container-luxe animate-fade-up py-2.5 text-center text-[11px] uppercase tracking-[0.24em]" aria-live="polite">
+    <div className="border-b border-maroon/10 bg-pearl text-maroon">
+      <p key={i} className="container-luxe animate-fade-up py-2 text-center text-[12px] tracking-[0.04em]" aria-live="polite">
         {messages[i]}
       </p>
     </div>

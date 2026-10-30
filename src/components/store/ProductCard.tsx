@@ -9,7 +9,7 @@ import { WishlistButton } from "./WishlistButton";
 export function ProductCard({ p, wished = false }: { p: ProductCardData; wished?: boolean }) {
   return (
     <article className="group card-hover relative">
-      <div className="relative aspect-[4/5] overflow-hidden bg-ivory">
+      <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-ivory shadow-md">
         <Link href={`/products/${p.slug}`} aria-label={p.name} className="absolute inset-0">
           <Media src={p.image} alt={p.name} sizes="(min-width: 1024px) 25vw, 50vw" />
           {p.hoverImage && (
@@ -40,7 +40,7 @@ export function ProductCard({ p, wished = false }: { p: ProductCardData; wished?
           {formatPHP(p.minPrice)}
           {p.compareAt && <s className="ml-2 text-muted">{formatPHP(p.compareAt)}</s>}
         </p>
-        {p.variants.length > 1 && <p className="text-[12px] text-muted">{p.variants.map((v) => v.name).join(" · ")}</p>}
+        {p.variants.length > 1 && <p className="text-[12px] text-muted">{p.variants.length} options</p>}
         {p.rating && (
           <p className="flex items-center justify-center gap-2 text-[12px] text-muted">
             <Stars value={p.rating.average} /> ({p.rating.count})

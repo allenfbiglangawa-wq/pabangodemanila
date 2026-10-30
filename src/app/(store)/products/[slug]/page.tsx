@@ -45,8 +45,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const p = await load(slug);
-  // The per-scent candle pages were merged into one listing; keep old shared links working.
-  if (!p && slug.endsWith("-perfumed-candle")) permanentRedirect("/products/perfumed-candle");
+  // The merged candle listing (23–30 Oct 2026) was split back into one page per scent.
+  if (!p && slug === "perfumed-candle") permanentRedirect("/shop?category=scented-candles");
   if (!p) notFound();
   const [user, policies] = await Promise.all([getCurrentUser(), getSetting("policies")]);
   const wished = user ? Boolean(await db.wishlistItem.findUnique({ where: { userId_productId: { userId: user.id, productId: p.id } } })) : false;
@@ -98,12 +98,18 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           {p.isPlaceholder && <p className="mb-5 border border-sand bg-ivory px-4 py-3 text-[12px] text-champagne-deep">Sample product for demonstration. Not a real item.</p>}
           {p.fragranceFamily && <p className="eyebrow">{p.fragranceFamily}</p>}
           <div className="mt-3 flex items-start justify-between gap-4">
-            <h1 className="display text-5xl lg:text-6xl">{p.name}</h1>
+            <h1 className="display text-5xl uppercase leading-[0.95] lg:text-6xl">{p.name}</h1>
             <WishlistButton productId={p.id} wished={wished} back={`/products/${p.slug}`} />
           </div>
-          <p className="mt-5 text-xl">
+          <p className="display mt-5 text-3xl">
             {prices.length > 1 && Math.min(...prices) !== Math.max(...prices) ? `${formatPHP(Math.min(...prices))} – ${formatPHP(Math.max(...prices))}` : formatPHP(prices[0] ?? 0)}
           </p>
+          {notes.some(([, n]) => n.length) && (
+            <div className="mt-5">
+              <p className="text-[15px] font-medium">Key Ingredients</p>
+              <p className="text-[14px] text-muted">{notes.flatMap(([, n]) => n).join(", ")}</p>
+            </div>
+          )}
           {showAggregate && (
             <a href="#reviews" className="mt-3 flex items-center gap-2 text-[13px] text-muted">
               <Stars value={avg} /> {avg.toFixed(1)} · {reviewCount} reviews

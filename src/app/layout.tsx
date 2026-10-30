@@ -1,17 +1,13 @@
 import type { Metadata, Viewport } from "next";
-import { Cormorant_Garamond, Inter } from "next/font/google";
+import { Gloock, Open_Sans } from "next/font/google";
 import { getSetting } from "@/lib/settings";
 import { siteUrl } from "@/lib/utils";
 import "./globals.css";
 
-const cormorant = Cormorant_Garamond({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
-  style: ["normal", "italic"],
-  variable: "--font-cormorant",
-  display: "swap",
-});
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
+// The client's mockup uses IDTF Identifier (headings) and Open Sauce / Gilroy (text). Until licensed
+// web-font files are supplied, Gloock and Open Sans are the closest free (OFL) stand-ins.
+const display = Gloock({ subsets: ["latin"], weight: "400", variable: "--font-display", display: "swap" });
+const body = Open_Sans({ subsets: ["latin"], weight: ["300", "400", "500", "600"], variable: "--font-body", display: "swap" });
 
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await getSetting("seo");
@@ -25,11 +21,11 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export const viewport: Viewport = { themeColor: "#ffffff" };
+export const viewport: Viewport = { themeColor: "#781d16" };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${cormorant.variable} ${inter.variable}`}>
+    <html lang="en" className={`${display.variable} ${body.variable}`}>
       <body>{children}</body>
     </html>
   );

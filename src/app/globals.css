@@ -2,17 +2,22 @@
 
 @theme {
   --color-pearl: #ffffff;
-  --color-ivory: #f6f4ef;
+  /* 2026 rebrand (client mockup): maroon + warm beige. "champagne" names are kept so every
+     existing accent picks up the new colours. */
+  --color-ivory: #ece7de;
   --color-charcoal: #292724;
-  --color-champagne: #c4ab82;
-  --color-champagne-deep: #8d7a5b; /* AA-contrast variant for small gold text on white */
-  --color-sand: #d7c4ab;
+  --color-champagne: #9a4a48;
+  --color-champagne-deep: #781d16; /* brand maroon, AA on white and beige */
+  --color-maroon: #781d16;
+  --color-maroon-soft: #9a4a48;
+  --color-beige: #d9d3c7;
+  --color-sand: #c9b8a8;
   --color-sage: #8a927d;
   --color-muted: #6b665e;
   --color-line: #e7e2d8;
 
-  --font-serif: var(--font-cormorant), "Cormorant Garamond", Georgia, serif;
-  --font-sans: var(--font-inter), Inter, ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-display), Georgia, serif;
+  --font-sans: var(--font-body), "Open Sans", ui-sans-serif, system-ui, sans-serif;
 
   --ease-luxe: cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -24,7 +29,9 @@
     scroll-behavior: smooth;
   }
   body {
-    @apply bg-pearl text-charcoal font-sans;
+    @apply bg-beige text-charcoal font-sans;
+    background-image: url("/brand/v2/bg-beige.jpg");
+    background-size: 1440px auto;
   }
   ::selection {
     background: var(--color-sand);
@@ -59,16 +66,16 @@
     @apply text-[11px] font-medium uppercase tracking-[0.28em] text-champagne-deep;
   }
   .display {
-    @apply font-serif font-light leading-[1.05] tracking-[-0.01em];
+    @apply font-serif leading-[1.05] tracking-[-0.01em];
   }
   .btn-primary {
-    @apply btn bg-charcoal text-pearl hover:bg-black;
+    @apply btn rounded-md bg-maroon text-pearl hover:bg-maroon-soft;
   }
   .btn-outline {
-    @apply btn border border-charcoal text-charcoal hover:bg-charcoal hover:text-pearl;
+    @apply btn rounded-md border border-maroon text-maroon hover:bg-maroon hover:text-pearl;
   }
   .btn-light {
-    @apply btn border border-pearl/80 text-pearl hover:bg-pearl hover:text-charcoal;
+    @apply btn rounded-md border border-pearl/80 text-pearl hover:bg-pearl hover:text-maroon;
   }
   .btn-link {
     @apply inline-flex items-center gap-2 border-b border-charcoal/40 pb-1 text-[12px] font-medium uppercase tracking-[0.2em] transition-colors hover:border-champagne hover:text-champagne-deep;

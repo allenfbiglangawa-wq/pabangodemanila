@@ -1,13 +1,14 @@
+import Image from "next/image";
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { getSetting } from "@/lib/settings";
 import { getCards } from "@/lib/catalog";
 import { getCurrentUser } from "@/lib/auth";
 import { formatDate } from "@/lib/utils";
+import { effectivePrice, formatPHP } from "@/lib/money";
 import { EVENT_TYPES, PRESS_KINDS } from "@/lib/constants";
 import { Media } from "@/components/Media";
 import { ArrowIcon, PlayIcon } from "@/components/Icons";
-import { HeroMedia } from "@/components/store/HeroMedia";
 import { ProductCard } from "@/components/store/ProductCard";
 import { SectionHeading } from "@/components/store/SectionHeading";
 import { NewsletterForm } from "@/components/store/NewsletterForm";
@@ -15,9 +16,12 @@ import { Stars } from "@/components/store/Stars";
 
 export const dynamic = "force-dynamic";
 
+// The design features one scent under the brand story. Starry Night is shown there in the mockup but is not a
+// candle we sell yet, so the first of these that exists and is active is used instead.
+const FEATURED_SLUGS = ["tuscan-orange-blossom-perfumed-candle", "oasis-perfumed-candle"];
+
 export default async function HomePage() {
-  const [hero, story, eventSettings, instagram, newsletter, user, stockists, business, externalReviews, spotlight, moments] = await Promise.all([
-    getSetting("hero"),
+  const [story, eventSettings, instagram, newsletter, user, stockists, business, externalReviews, spotlight, moments] = await Promise.all([
     getSetting("story"),
     getSetting("eventScenting"),
     getSetting("instagram"),
@@ -49,6 +53,13 @@ export default async function HomePage() {
     db.pressEntry.findMany({ where: { isPublished: true, kind: { in: ["TV", "INTERVIEW"] } }, orderBy: [{ sortOrder: "asc" }, { eventDate: "desc" }], select: { slug: true, title: true, programName: true, kind: true, eventDate: true } }),
   ]);
   const wished = new Set(wishlist.map((w) => w.productId));
+  const featuredOptions = await db.product.findMany({
+    where: { status: "ACTIVE", slug: { in: FEATURED_SLUGS } },
+    include: { images: { orderBy: { sortOrder: "asc" }, take: 1 }, variants: { where: { isActive: true } } },
+  });
+  const featured = FEATURED_SLUGS.map((slug) => featuredOptions.find((p) => p.slug === slug)).find(Boolean);
+  const featuredNotes = featured ? [featured.topNotes, featured.heartNotes, featured.baseNotes].filter(Boolean).join(", ") : "";
+  const featuredPrice = featured?.variants.length ? Math.min(...featured.variants.map(effectivePrice)) : null;
   const outsideReviews = externalReviews.items
     .map((line) => line.split("|").map((x) => x.trim()))
     .filter((parts) => parts.length >= 4 && parts[3])
@@ -62,22 +73,64 @@ export default async function HomePage() {
 
   return (
     <>
-      {/* Cinematic hero */}
-      <section className="relative -mt-px flex min-h-[78vh] items-end overflow-hidden bg-ivory lg:min-h-[88vh]" aria-label="Introduction">
-        <HeroMedia videoUrl={hero.videoUrl} poster={hero.posterImage} />
-        <div className="absolute inset-0 bg-gradient-to-t from-charcoal/80 via-charcoal/45 to-charcoal/10 lg:bg-gradient-to-r lg:to-transparent lg:from-charcoal/70 lg:via-charcoal/35" />
-        <div className="container-luxe relative pb-20 lg:pb-28">
-          <div className="max-w-2xl animate-fade-up text-pearl [text-shadow:0_1px_24px_rgba(0,0,0,0.18)]">
-            {hero.tagline && <p className="eyebrow mb-5 !text-pearl/85">{hero.tagline}</p>}
-            <h1 className="display text-5xl sm:text-6xl lg:text-[88px]">{hero.headline}</h1>
-            <p className="mt-6 max-w-lg text-[16px] leading-relaxed text-pearl/90 sm:text-[18px]">{hero.subheadline}</p>
-            <div className="mt-10 flex flex-wrap gap-4">
-              <Link href={hero.primaryHref} className="btn bg-pearl text-charcoal hover:bg-ivory">{hero.primaryLabel}</Link>
-              <Link href={hero.secondaryHref} className="btn-light">{hero.secondaryLabel}</Link>
+      {/* Hero, from the client's 2026 design: maroon field, one large photo, two smaller ones */}
+      <section className="relative overflow-hidden bg-maroon text-pearl" aria-label="Introduction" style={{ backgroundImage: "url(/brand/v2/bg-maroon.jpg)", backgroundSize: "cover" }}>
+        <div className="container-luxe grid items-center gap-10 py-12 lg:grid-cols-12 lg:gap-12 lg:py-16">
+          <Link href="/shop?category=scented-candles" className="relative block aspect-[16/11] overflow-hidden rounded-3xl shadow-2xl lg:col-span-7">
+            <Image src="/brand/v2/candle-tuscan-orange-blossom.jpg" alt="Tuscan Orange Blossom perfumed candle with fresh oranges" fill priority sizes="(min-width:1024px) 55vw, 100vw" className="object-cover" />
+          </Link>
+          <div className="lg:col-span-5">
+            <h1 className="display text-5xl leading-[1.02] sm:text-6xl lg:text-[64px]">A Whole<br />sensory<br />experience.</h1>
+            <Link href="/shop" className="btn mt-8 rounded-md bg-[#5c120d] !px-9 !py-3 normal-case tracking-normal text-[14px] text-pearl hover:bg-black/60">Explore</Link>
+            <div className="relative mt-10 h-56 sm:h-64">
+              <Link href="/shop?category=reed-diffusers" className="absolute left-[38%] top-6 block aspect-[3/4] h-[88%] overflow-hidden rounded-2xl shadow-xl">
+                <Image src="/brand/v2/reed-oasis.jpg" alt="Oasis reed diffuser" fill sizes="200px" className="object-cover" />
+              </Link>
+              <Link href="/shop?category=room-linen-sprays" className="absolute left-0 top-0 block aspect-[3/4] h-full overflow-hidden rounded-2xl shadow-2xl">
+                <Image src="/brand/v2/spray-lavender.jpg" alt="Room and linen spray among lavender" fill sizes="220px" className="object-cover" />
+              </Link>
             </div>
           </div>
         </div>
       </section>
+
+      {/* Brand story with the full logo, on the soft maroon pattern */}
+      <section className="relative overflow-hidden bg-maroon-soft text-pearl">
+        <div className="absolute inset-0 opacity-40 mix-blend-multiply" style={{ backgroundImage: "url(/brand/v2/bg-maroon.jpg)", backgroundSize: "cover" }} aria-hidden />
+        <div className="container-luxe relative grid items-center gap-12 py-20 lg:grid-cols-12 lg:py-28">
+          <div className="lg:col-span-7">
+            <h2 className="display text-5xl uppercase [text-shadow:0_3px_0_rgba(0,0,0,0.15)] lg:text-7xl">{story.heading}</h2>
+            <div className="mt-6 max-w-xl space-y-4 text-[15px] leading-relaxed text-pearl/90">
+              {story.body.split(/\n\n+/).slice(0, 1).map((para, i) => <p key={i}>{para}</p>)}
+            </div>
+            <Link href="/our-story" className="btn-light mt-8">Our Story</Link>
+          </div>
+          <div className="flex justify-center lg:col-span-5">
+            <Image src="/brand/v2/logo-lockup-white.png" alt="Pabango de Manila, A Filipino Fragrance House" width={726} height={864} className="h-56 w-auto lg:h-72" />
+          </div>
+        </div>
+      </section>
+
+      {/* Featured scent: name repeated softly behind, as in the design */}
+      {featured && (
+        <section className="relative overflow-hidden py-20 lg:py-28" aria-labelledby="featured-heading">
+          <div className="pointer-events-none absolute inset-0 select-none overflow-hidden font-serif text-[88px] uppercase leading-[0.95] text-charcoal/[0.05] lg:text-[120px]" aria-hidden>
+            {Array.from({ length: 8 }, (_, i) => <p key={i} className="whitespace-nowrap" style={{ marginLeft: i % 2 ? "-1.5em" : 0 }}>{`${featured.name} `.repeat(6)}</p>)}
+          </div>
+          <div className="container-luxe relative grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
+            <Link href={`/products/${featured.slug}`} className="relative mx-auto block aspect-[4/5] w-full max-w-md overflow-hidden rounded-3xl bg-pearl shadow-xl">
+              {featured.images[0] && <Image src={featured.images[0].url} alt={featured.images[0].alt || featured.name} fill sizes="(min-width:1024px) 40vw, 100vw" className="object-contain" />}
+            </Link>
+            <div>
+              <h2 id="featured-heading" className="display text-5xl uppercase lg:text-6xl">{featured.name}</h2>
+              {featuredNotes && <><p className="mt-4 text-[15px] font-medium">Key Ingredients</p><p className="text-[14px] text-muted">{featuredNotes}</p></>}
+              <p className="mt-6 max-w-xl text-[15px] leading-relaxed text-charcoal/85">{featured.description.split(/\n\n+/)[0]}</p>
+              {featuredPrice != null && <p className="display mt-8 text-4xl">{formatPHP(featuredPrice)}</p>}
+              <Link href={`/products/${featured.slug}`} className="btn-primary mt-6 !px-9 !py-3 normal-case tracking-normal text-[14px]">Explore</Link>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Collections */}
       {categories.length > 0 && (
@@ -86,7 +139,7 @@ export default async function HomePage() {
           <div className="mt-16 grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
             {categories.map((c) => (
               <Link key={c.id} href={`/shop?category=${c.slug}`} className="group card-hover block">
-                <div className="relative aspect-[3/4] overflow-hidden bg-ivory">
+                <div className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-ivory shadow-md">
                   <Media src={c.imageUrl} alt={c.name} sizes="(min-width:1024px) 25vw, 50vw" />
                 </div>
                 <div className="mt-5 flex items-center justify-between">
@@ -115,23 +168,6 @@ export default async function HomePage() {
           </div>
         </section>
       )}
-
-      {/* Brand story */}
-      <section className="container-luxe grid items-center gap-12 py-24 lg:grid-cols-2 lg:gap-24 lg:py-32">
-        <div className="relative aspect-[4/5] overflow-hidden bg-ivory">
-          <Media src={story.image} alt="Pabango de Manila" sizes="(min-width:1024px) 50vw, 100vw" />
-        </div>
-        <div>
-          <p className="eyebrow mb-5">The Art of Scent</p>
-          <h2 className="display text-5xl lg:text-6xl">{story.heading}</h2>
-          <div className="prose-luxe mt-8">
-            {story.body.split(/\n\n+/).slice(0, 2).map((para, i) => (
-              <p key={i}>{para}</p>
-            ))}
-          </div>
-          <Link href="/our-story" className="btn-link mt-10">Discover Our Story <ArrowIcon /></Link>
-        </div>
-      </section>
 
       {/* In the Spotlight: TV & media (verified, published features only; no broadcast captures) */}
       <section className="bg-ivory py-24 lg:py-32" aria-labelledby="spotlight-heading">
