@@ -33,7 +33,7 @@ export default async function HomePage() {
     getSetting("spotlight"),
     getSetting("moments"),
   ]);
-  const [categories, signature, tvFeature, events, testimonials, wishlist, featuredIn] = await Promise.all([
+  const [categories, signature, tvFeature, events, testimonials, wishlist, featuredIn, featuredOptions] = await Promise.all([
     db.category.findMany({ where: { isActive: true, products: { some: { status: "ACTIVE" } } }, orderBy: { sortOrder: "asc" }, take: 4 }),
     getCards({ OR: [{ isFeatured: true }, { isBestseller: true }] }, { updatedAt: "desc" }, 8),
     db.pressEntry.findFirst({ where: { isPublished: true, featureOnHome: true, kind: { in: ["TV", "INTERVIEW"] } }, orderBy: { eventDate: "desc" } }),
@@ -51,12 +51,12 @@ export default async function HomePage() {
     }),
     user ? db.wishlistItem.findMany({ where: { userId: user.id }, select: { productId: true } }) : [],
     db.pressEntry.findMany({ where: { isPublished: true, kind: { in: ["TV", "INTERVIEW"] } }, orderBy: [{ sortOrder: "asc" }, { eventDate: "desc" }], select: { slug: true, title: true, programName: true, kind: true, eventDate: true } }),
+    db.product.findMany({
+      where: { status: "ACTIVE", slug: { in: FEATURED_SLUGS } },
+      include: { images: { orderBy: { sortOrder: "asc" }, take: 1 }, variants: { where: { isActive: true } } },
+    }),
   ]);
   const wished = new Set(wishlist.map((w) => w.productId));
-  const featuredOptions = await db.product.findMany({
-    where: { status: "ACTIVE", slug: { in: FEATURED_SLUGS } },
-    include: { images: { orderBy: { sortOrder: "asc" }, take: 1 }, variants: { where: { isActive: true } } },
-  });
   const featured = FEATURED_SLUGS.map((slug) => featuredOptions.find((p) => p.slug === slug)).find(Boolean);
   const featuredNotes = featured ? [featured.topNotes, featured.heartNotes, featured.baseNotes].filter(Boolean).join(", ") : "";
   const featuredPrice = featured?.variants.length ? Math.min(...featured.variants.map(effectivePrice)) : null;

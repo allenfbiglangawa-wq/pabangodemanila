@@ -1,0 +1,7 @@
+# Cloudflare static assets: let browsers keep pictures and build files instead of re-downloading them.
+/_next/static/*
+  Cache-Control: public, max-age=31536000, immutable
+/brand/*
+  Cache-Control: public, max-age=604800
+/placeholders/*
+  Cache-Control: public, max-age=604800

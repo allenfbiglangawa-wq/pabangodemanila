@@ -176,8 +176,21 @@ export const SETTING_DEFAULTS = {
 export type Settings = typeof SETTING_DEFAULTS;
 export type SettingKey = keyof Settings;
 
+// Every page reads several settings; fetching them all in one query, and keeping them for a short
+// while in the worker's memory, saves a round trip to the database per setting.
+const SETTINGS_TTL_MS = 30_000;
+let memo: { at: number; rows: Map<string, string> } | null = null;
+
+const loadAllSettings = cache(async (): Promise<Map<string, string>> => {
+  if (memo && Date.now() - memo.at < SETTINGS_TTL_MS) return memo.rows;
+  const rows = new Map((await db.siteSetting.findMany()).map((r) => [r.key, r.value] as const));
+  memo = { at: Date.now(), rows };
+  return rows;
+});
+
 export const getSetting = cache(async <K extends SettingKey>(key: K): Promise<Settings[K]> => {
-  const row = await db.siteSetting.findUnique({ where: { key } });
+  const value = (await loadAllSettings()).get(key);
+  const row = value === undefined ? null : { value };
   const defaults = SETTING_DEFAULTS[key];
   if (!row) return defaults;
   try {
@@ -190,4 +203,5 @@ export const getSetting = cache(async <K extends SettingKey>(key: K): Promise<Se
 export async function saveSetting<K extends SettingKey>(key: K, value: Settings[K]): Promise<void> {
   const json = JSON.stringify(value);
   await db.siteSetting.upsert({ where: { key }, create: { key, value: json }, update: { value: json } });
+  memo = null;
 }
