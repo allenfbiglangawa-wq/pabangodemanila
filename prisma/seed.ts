@@ -35,11 +35,11 @@ async function main() {
   const categories = [
     { slug: "scented-candles", name: "Scented Candles", imageUrl: "/brand/v2/candle-category.jpg", sortOrder: 1, description: "Hand-poured soy candles, cured for 3–7 days for a cleaner burn and fuller scent throw." },
     { slug: "room-linen-sprays", name: "Room & Linen Sprays", imageUrl: "/brand/v2/spray-lavender.jpg", sortOrder: 2, description: "Phthalate-free perfumed sprays for rooms and linens." },
-    { slug: "reed-diffusers", name: "Reed Diffusers", imageUrl: "/brand/v2/reed-oasis.jpg", sortOrder: 3, description: "Steady, flameless scent diffusion for any room." },
+    { slug: "reed-diffusers", name: "Reed Diffusers", imageUrl: "/brand/v2/pabango-oasis-reed-diffuser.jpg", sortOrder: 3, description: "Steady, flameless scent diffusion for any room." },
     { slug: "humidifier-oils", name: "Aroma Diffuser Oils", imageUrl: "/brand/v2/oil-zen-forest.jpg", sortOrder: 4, description: "Fragrance oils made for humidifiers and electric aroma diffusers." },
     { slug: "gift-sets", name: "Gift Sets & Wedding Favors", imageUrl: "/placeholders/giftbox.svg", sortOrder: 5, description: "Gift sets in handmade paper maché boxes from Pakil, Laguna." },
   ];
-  const PREVIOUS_CATEGORY_IMAGES = ["/brand/candles/london-bloom.jpg", "/brand/v2/candle-tuscan-orange-blossom.jpg", "/brand/v2/candle-tuscan-orange-blossom-portrait.jpg", "/brand/room-linen-sprays.jpg", "/brand/oasis-reed-diffuser.jpg", "/brand/aroma-diffuser-oils.jpg"];
+  const PREVIOUS_CATEGORY_IMAGES = ["/brand/candles/london-bloom.jpg", "/brand/v2/candle-tuscan-orange-blossom.jpg", "/brand/v2/reed-oasis.jpg", "/brand/v2/candle-tuscan-orange-blossom-portrait.jpg", "/brand/room-linen-sprays.jpg", "/brand/oasis-reed-diffuser.jpg", "/brand/aroma-diffuser-oils.jpg"];
   for (const c of categories) {
     const existing = await db.category.findUnique({ where: { slug: c.slug } });
     if (!existing) await db.category.create({ data: c });
@@ -182,10 +182,13 @@ async function main() {
     if (!(await db.productVariant.count({ where: { productId: merged.id } }))) await db.product.update({ where: { id: merged.id }, data: { status: "ARCHIVED" } });
   }
 
+  // The first Oasis reed photo had a misspelled label; the client sent a corrected one (31 Oct 2026).
+  await db.productImage.updateMany({ where: { url: "/brand/v2/reed-oasis.jpg" }, data: { url: "/brand/v2/pabango-oasis-reed-diffuser.jpg" } });
+
   // Photos from the client's 2026 website design go first on their products (added once, never duplicated).
   const designPhotos: [string, string, string][] = [
     ["tuscan-orange-blossom-perfumed-candle", "/brand/v2/candle-tuscan-orange-blossom-portrait.jpg", "Tuscan Orange Blossom perfumed candle with fresh oranges"],
-    ["reed-diffuser", "/brand/v2/reed-oasis.jpg", "Oasis reed diffuser in an amber glass bottle"],
+    ["reed-diffuser", "/brand/v2/pabango-oasis-reed-diffuser.jpg", "Oasis reed diffuser in an amber glass bottle"],
     ["aroma-diffuser-oil", "/brand/v2/oil-zen-forest.jpg", "Zen Forest aroma diffuser oil dropper bottle"],
   ];
   for (const [slug, url, alt] of designPhotos) {

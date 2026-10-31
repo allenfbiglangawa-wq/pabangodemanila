@@ -72,7 +72,7 @@ export default async function HomePage() {
             <Link href="/shop" className="btn mt-8 rounded-md bg-[#5c120d] !px-9 !py-3 normal-case tracking-normal text-[14px] text-pearl hover:bg-black/60">Explore</Link>
             <div className="relative mt-10 h-56 sm:h-64">
               <Link href="/shop?category=reed-diffusers" className="absolute left-[38%] top-6 block aspect-[3/4] h-[88%] overflow-hidden rounded-2xl shadow-xl">
-                <Image src="/brand/v2/reed-oasis.jpg" alt="Oasis reed diffuser" fill sizes="200px" className="object-cover" />
+                <Image src="/brand/v2/pabango-oasis-reed-diffuser.jpg" alt="Oasis reed diffuser" fill sizes="200px" className="object-cover" />
               </Link>
               <Link href="/shop?category=room-linen-sprays" className="absolute left-0 top-0 block aspect-[3/4] h-full overflow-hidden rounded-2xl shadow-2xl">
                 <Image src="/brand/v2/spray-lavender.jpg" alt="Room and linen spray among lavender" fill sizes="220px" className="object-cover" />
