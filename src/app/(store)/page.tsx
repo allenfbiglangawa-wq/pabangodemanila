@@ -5,7 +5,6 @@ import { getSetting } from "@/lib/settings";
 import { getCards } from "@/lib/catalog";
 import { getCurrentUser } from "@/lib/auth";
 import { formatDate } from "@/lib/utils";
-import { effectivePrice, formatPHP } from "@/lib/money";
 import { EVENT_TYPES, PRESS_KINDS } from "@/lib/constants";
 import { Media } from "@/components/Media";
 import { ArrowIcon, PlayIcon } from "@/components/Icons";
@@ -16,10 +15,6 @@ import { Stars } from "@/components/store/Stars";
 import { SocialLinks } from "@/components/store/SocialLinks";
 
 export const dynamic = "force-dynamic";
-
-// The design features one scent under the brand story. Starry Night is shown there in the mockup but is not a
-// candle we sell yet, so the first of these that exists and is active is used instead.
-const FEATURED_SLUGS = ["tuscan-orange-blossom-perfumed-candle", "oasis-perfumed-candle"];
 
 export default async function HomePage() {
   const [story, eventSettings, instagram, newsletter, user, business, externalReviews, spotlight, moments] = await Promise.all([
@@ -33,7 +28,7 @@ export default async function HomePage() {
     getSetting("spotlight"),
     getSetting("moments"),
   ]);
-  const [categories, signature, tvFeature, events, testimonials, wishlist, featuredIn, featuredOptions] = await Promise.all([
+  const [categories, signature, tvFeature, events, testimonials, wishlist, featuredIn] = await Promise.all([
     db.category.findMany({ where: { isActive: true, products: { some: { status: "ACTIVE" } } }, orderBy: { sortOrder: "asc" }, take: 4 }),
     getCards({ OR: [{ isFeatured: true }, { isBestseller: true }] }, { updatedAt: "desc" }, 8),
     db.pressEntry.findFirst({ where: { isPublished: true, featureOnHome: true, kind: { in: ["TV", "INTERVIEW"] } }, orderBy: { eventDate: "desc" } }),
@@ -51,15 +46,8 @@ export default async function HomePage() {
     }),
     user ? db.wishlistItem.findMany({ where: { userId: user.id }, select: { productId: true } }) : [],
     db.pressEntry.findMany({ where: { isPublished: true, kind: { in: ["TV", "INTERVIEW"] } }, orderBy: [{ sortOrder: "asc" }, { eventDate: "desc" }], select: { slug: true, title: true, programName: true, kind: true, eventDate: true } }),
-    db.product.findMany({
-      where: { status: "ACTIVE", slug: { in: FEATURED_SLUGS } },
-      include: { images: { orderBy: { sortOrder: "asc" }, take: 1 }, variants: { where: { isActive: true } } },
-    }),
   ]);
   const wished = new Set(wishlist.map((w) => w.productId));
-  const featured = FEATURED_SLUGS.map((slug) => featuredOptions.find((p) => p.slug === slug)).find(Boolean);
-  const featuredNotes = featured ? [featured.topNotes, featured.heartNotes, featured.baseNotes].filter(Boolean).join(", ") : "";
-  const featuredPrice = featured?.variants.length ? Math.min(...featured.variants.map(effectivePrice)) : null;
   const outsideReviews = externalReviews.items
     .map((line) => line.split("|").map((x) => x.trim()))
     .filter((parts) => parts.length >= 4 && parts[3])
@@ -99,9 +87,10 @@ export default async function HomePage() {
         <div className="absolute inset-0 opacity-40 mix-blend-multiply" style={{ backgroundImage: "url(/brand/v2/bg-maroon.jpg)", backgroundSize: "cover" }} aria-hidden />
         <div className="container-luxe relative grid items-center gap-12 py-20 lg:grid-cols-12 lg:py-28">
           <div className="lg:col-span-7">
-            <h2 className="display text-5xl uppercase [text-shadow:0_3px_0_rgba(0,0,0,0.15)] lg:text-7xl">{story.heading}</h2>
+            <h2 className="display text-5xl uppercase [text-shadow:0_3px_0_rgba(0,0,0,0.15)] lg:text-7xl">The Philosophy of Scented Living</h2>
             <div className="mt-6 max-w-xl space-y-4 text-[15px] leading-relaxed text-pearl/90">
-              {story.body.split(/\n\n+/).slice(0, 1).map((para, i) => <p key={i}>{para}</p>)}
+              <p>Pabango de Manila is a Filipino fragrance house devoted to creating meaningful scent experiences for everyday living.</p>
+              <p>Rooted in the art of fragrance and guided by thoughtful craftsmanship, we create scented candles, reed diffusers, room and linen sprays, diffuser oils, and lifestyle fragrances designed to transform spaces, evoke emotions, and make everyday moments more memorable.</p>
             </div>
             <Link href="/our-story" className="btn-light mt-8">Our Story</Link>
           </div>
@@ -111,26 +100,23 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Featured scent: name repeated softly behind, as in the design */}
-      {featured && (
-        <section className="relative overflow-hidden py-20 lg:py-28" aria-labelledby="featured-heading">
-          <div className="pointer-events-none absolute inset-0 select-none overflow-hidden font-serif text-[88px] uppercase leading-[0.95] text-charcoal/[0.05] lg:text-[120px]" aria-hidden>
-            {Array.from({ length: 8 }, (_, i) => <p key={i} className="whitespace-nowrap" style={{ marginLeft: i % 2 ? "-1.5em" : 0 }}>{`${featured.name} `.repeat(6)}</p>)}
+      {/* Seasonal feature: PDM Christmas Collection (client revision, 31 Oct 2026) */}
+      <section className="relative overflow-hidden py-20 lg:py-28" aria-labelledby="featured-heading">
+        <div className="pointer-events-none absolute inset-0 select-none overflow-hidden font-serif text-[88px] uppercase leading-[0.95] text-charcoal/[0.05] lg:text-[120px]" aria-hidden>
+          {Array.from({ length: 8 }, (_, i) => <p key={i} className="whitespace-nowrap" style={{ marginLeft: i % 2 ? "-1.5em" : 0 }}>{"Christmas Collection ".repeat(5)}</p>)}
+        </div>
+        <div className="container-luxe relative grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
+          <Link href="/shop?category=scented-candles" className="relative mx-auto block aspect-[5/7] w-full max-w-md overflow-hidden rounded-3xl shadow-xl">
+            <Image src="/brand/v2/christmas-collection.jpg" alt="PDM Christmas Collection candles in red jars with a Pabango de Manila gift bag" fill sizes="(min-width:1024px) 40vw, 100vw" className="object-cover" />
+          </Link>
+          <div>
+            <p className="eyebrow mb-4">Now in season</p>
+            <h2 id="featured-heading" className="display text-5xl uppercase lg:text-6xl">PDM Christmas Collection</h2>
+            <p className="mt-6 max-w-xl text-[15px] leading-relaxed text-charcoal/85">Holiday candles from Pabango de Manila, dressed in festive red and ready for gifting.</p>
+            <Link href="/shop?category=scented-candles" className="btn-primary mt-8 !px-9 !py-3 normal-case tracking-normal text-[14px]">Explore</Link>
           </div>
-          <div className="container-luxe relative grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
-            <Link href={`/products/${featured.slug}`} className="relative mx-auto block aspect-[4/5] w-full max-w-md overflow-hidden rounded-3xl bg-pearl shadow-xl">
-              {featured.images[0] && <Image src={featured.images[0].url} alt={featured.images[0].alt || featured.name} fill sizes="(min-width:1024px) 40vw, 100vw" className="object-contain" />}
-            </Link>
-            <div>
-              <h2 id="featured-heading" className="display text-5xl uppercase lg:text-6xl">{featured.name}</h2>
-              {featuredNotes && <><p className="mt-4 text-[15px] font-medium">Key Ingredients</p><p className="text-[14px] text-muted">{featuredNotes}</p></>}
-              <p className="mt-6 max-w-xl text-[15px] leading-relaxed text-charcoal/85">{featured.description.split(/\n\n+/)[0]}</p>
-              {featuredPrice != null && <p className="display mt-8 text-4xl">{formatPHP(featuredPrice)}</p>}
-              <Link href={`/products/${featured.slug}`} className="btn-primary mt-6 !px-9 !py-3 normal-case tracking-normal text-[14px]">Explore</Link>
-            </div>
-          </div>
-        </section>
-      )}
+        </div>
+      </section>
 
       {/* Collections */}
       {categories.length > 0 && (

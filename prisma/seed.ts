@@ -37,7 +37,7 @@ async function main() {
     { slug: "room-linen-sprays", name: "Room & Linen Sprays", imageUrl: "/brand/v2/spray-lavender.jpg", sortOrder: 2, description: "Phthalate-free perfumed sprays for rooms and linens." },
     { slug: "reed-diffusers", name: "Reed Diffusers", imageUrl: "/brand/v2/reed-oasis.jpg", sortOrder: 3, description: "Steady, flameless scent diffusion for any room." },
     { slug: "humidifier-oils", name: "Aroma Diffuser Oils", imageUrl: "/brand/v2/oil-zen-forest.jpg", sortOrder: 4, description: "Fragrance oils made for humidifiers and electric aroma diffusers." },
-    { slug: "gift-sets", name: "Gift Sets", imageUrl: "/placeholders/giftbox.svg", sortOrder: 5, description: "Gift sets in handmade paper maché boxes from Pakil, Laguna." },
+    { slug: "gift-sets", name: "Gift Sets & Wedding Favors", imageUrl: "/placeholders/giftbox.svg", sortOrder: 5, description: "Gift sets in handmade paper maché boxes from Pakil, Laguna." },
   ];
   const PREVIOUS_CATEGORY_IMAGES = ["/brand/candles/london-bloom.jpg", "/brand/v2/candle-tuscan-orange-blossom.jpg", "/brand/room-linen-sprays.jpg", "/brand/oasis-reed-diffuser.jpg", "/brand/aroma-diffuser-oils.jpg"];
   for (const c of categories) {
@@ -248,6 +248,12 @@ async function main() {
     await db.pressImage.deleteMany({ where: { pressEntryId: saved.id } });
     if (images.length) await db.pressImage.createMany({ data: images.map((img, i) => ({ ...img, pressEntryId: saved.id, sortOrder: i })) });
   }
+
+  // Client revision (31 Oct 2026): the gift category also covers wedding favors.
+  await db.category.updateMany({ where: { slug: "gift-sets", name: "Gift Sets" }, data: { name: "Gift Sets & Wedding Favors" } });
+
+  // TV5 Perfect Mornings interview video (client revision, 31 Oct 2026); kept if the owner set another link.
+  await db.pressEntry.updateMany({ where: { slug: "perfect-mornings-one-ph", videoUrl: null }, data: { videoUrl: "https://www.youtube.com/watch?v=ohwU3Mv-AKQ&t=253s" } });
 
   // Register the owner's photos in the Media Library so they can be reused and re-captioned.
   const brandDir = path.join(process.cwd(), "public", "brand");
