@@ -106,7 +106,7 @@ export default async function HomePage() {
           {Array.from({ length: 8 }, (_, i) => <p key={i} className="whitespace-nowrap" style={{ marginLeft: i % 2 ? "-1.5em" : 0 }}>{"Christmas Collection ".repeat(5)}</p>)}
         </div>
         <div className="container-luxe relative grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
-          <Link href="/shop?category=scented-candles" className="relative mx-auto block aspect-[5/7] w-full max-w-md overflow-hidden rounded-3xl shadow-xl">
+          <Link href="/shop?category=scented-candles" className="relative mx-auto block aspect-[2/3] w-full max-w-md overflow-hidden rounded-3xl shadow-xl">
             <Image src="/brand/v2/christmas-collection.jpg" alt="PDM Christmas Collection candles in red jars with a Pabango de Manila gift bag" fill sizes="(min-width:1024px) 40vw, 100vw" className="object-cover" />
           </Link>
           <div>
