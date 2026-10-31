@@ -34,12 +34,12 @@ async function main() {
   // with scent names and photos supplied by the owner.
   const categories = [
     { slug: "scented-candles", name: "Scented Candles", imageUrl: "/brand/v2/candle-category.jpg", sortOrder: 1, description: "Hand-poured soy candles, cured for 3–7 days for a cleaner burn and fuller scent throw." },
-    { slug: "room-linen-sprays", name: "Room & Linen Sprays", imageUrl: "/brand/v2/pabango-room-linen-sprays.jpg", sortOrder: 2, description: "Phthalate-free perfumed sprays for rooms and linens." },
+    { slug: "room-linen-sprays", name: "Room & Linen Sprays", imageUrl: "/brand/v2/pabango-lavender-spray.jpg", sortOrder: 2, description: "Phthalate-free perfumed sprays for rooms and linens." },
     { slug: "reed-diffusers", name: "Reed Diffusers", imageUrl: "/brand/v2/pabango-oasis-reed-diffuser.jpg", sortOrder: 3, description: "Steady, flameless scent diffusion for any room." },
     { slug: "humidifier-oils", name: "Aroma Diffuser Oils", imageUrl: "/brand/v2/oil-zen-forest.jpg", sortOrder: 4, description: "Fragrance oils made for humidifiers and electric aroma diffusers." },
     { slug: "gift-sets", name: "Gift Sets & Wedding Favors", imageUrl: "/placeholders/giftbox.svg", sortOrder: 5, description: "Gift sets in handmade paper maché boxes from Pakil, Laguna." },
   ];
-  const PREVIOUS_CATEGORY_IMAGES = ["/brand/candles/london-bloom.jpg", "/brand/v2/candle-tuscan-orange-blossom.jpg", "/brand/v2/spray-lavender.jpg", "/brand/v2/reed-oasis.jpg", "/brand/v2/candle-tuscan-orange-blossom-portrait.jpg", "/brand/room-linen-sprays.jpg", "/brand/oasis-reed-diffuser.jpg", "/brand/aroma-diffuser-oils.jpg"];
+  const PREVIOUS_CATEGORY_IMAGES = ["/brand/v2/pabango-room-linen-sprays.jpg", "/brand/candles/london-bloom.jpg", "/brand/v2/candle-tuscan-orange-blossom.jpg", "/brand/v2/spray-lavender.jpg", "/brand/v2/reed-oasis.jpg", "/brand/v2/candle-tuscan-orange-blossom-portrait.jpg", "/brand/room-linen-sprays.jpg", "/brand/oasis-reed-diffuser.jpg", "/brand/aroma-diffuser-oils.jpg"];
   for (const c of categories) {
     const existing = await db.category.findUnique({ where: { slug: c.slug } });
     if (!existing) await db.category.create({ data: c });

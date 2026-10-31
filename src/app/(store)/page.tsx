@@ -75,7 +75,7 @@ export default async function HomePage() {
                 <Image src="/brand/v2/pabango-oasis-reed-diffuser.jpg" alt="Oasis reed diffuser" fill sizes="200px" className="object-cover" />
               </Link>
               <Link href="/shop?category=room-linen-sprays" className="absolute left-0 top-0 block aspect-[3/4] h-full overflow-hidden rounded-2xl shadow-2xl">
-                <Image src="/brand/v2/pabango-room-linen-sprays.jpg" alt="Pabango de Manila room and linen sprays" fill sizes="220px" className="object-cover" />
+                <Image src="/brand/v2/pabango-lavender-spray.jpg" alt="PDM Lavender room and linen spray among lavender" fill sizes="220px" className="object-cover" />
               </Link>
             </div>
           </div>
