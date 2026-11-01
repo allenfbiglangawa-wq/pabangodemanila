@@ -78,7 +78,7 @@ export async function SiteFooter() {
       </div>
       <div className="border-t border-line">
         <div className="container-luxe flex items-center justify-between gap-4 py-6 text-[12px] text-muted">
-          <p>© {new Date().getFullYear()} Pabango de Manila. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Pabango de Manila. All rights reserved. · Website by{" "}<a href="https://likhawebstudioph.com/" target="_blank" rel="noopener" className="underline hover:text-charcoal">Likha Web Studio</a></p>
           <Link href="/admin/login" className="hover:text-charcoal">Admin sign in</Link>
         </div>
       </div>
